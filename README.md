@@ -4,6 +4,11 @@
 
 > **Rama principal (`main`) en español. Rama `english` con documentación traducida al inglés.**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Andres34r7y4/themis/pulls)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/Andres34r7y4?style=social)](https://github.com/sponsors/Andres34r7y4)
+
 Themis es un protocolo de gobernanza autónomo, determinístico y multi-rol para cualquier repositorio que utilice agentes basados en LLM. Su propósito es hacer **predecible el camino de la IA en producción** mediante pautas obligatorias que definen quién decide, quién ejecuta y quién audita.
 
 ---
@@ -40,9 +45,19 @@ Themis introduce un **kernel de gobernanza** (`agent.md`) que el LLM debe consum
 
 ```
 themis/
+├── .github/
+│   ├── FUNDING.yml
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   └── PULL_REQUEST_TEMPLATE.md
 ├── docs/
-│   └── assets/
-│       └── themis-banner.jpeg      # Imagen de portada oficial
+│   ├── assets/
+│   │   └── themis-banner.jpeg      # Imagen de portada oficial
+│   ├── ARCHITECTURE.md             # Diagrama Mermaid del state machine
+│   ├── EXAMPLES.md                 # Ejemplos de integración con LLMs
+│   ├── SECURITY.md                 # Política de seguridad
+│   └── guia-uso.md                 # Guía operativa
 ├── themis/
 │   ├── agent.md                    # Kernel de gobernanza (contrato central)
 │   ├── PATHS.md                    # Fuente única de rutas del sistema
@@ -70,10 +85,17 @@ themis/
 │       ├── run-roles-loop.md       # Ejecución del loop de roles
 │       ├── template-task.md        # Plantilla de tarea
 │       └── template-backlog.md     # Plantilla de backlog
+├── cli.py                          # CLI de gobernanza
+├── core/
+│   ├── __init__.py
+│   ├── kernel.py                   # Motor PRE-FLIGHT
+│   ├── roles.py                    # Registro de 10 roles
+│   └── loop.py                     # Orquestador de estados
 ├── LICENSE                         # Licencia MIT
 ├── README.md                       # Este archivo
 ├── CONTRIBUTING.md                 # Guía de contribución
-└── CHANGELOG.md                    # Registro de cambios
+├── CHANGELOG.md                    # Registro de cambios
+└── pyproject.toml                  # Empaquetado Python
 ```
 
 ---
@@ -83,7 +105,7 @@ themis/
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/themis.git
+git clone git@github.com:Andres34r7y4/themis.git
 cd themis
 ```
 
@@ -124,6 +146,26 @@ Antes de realizar cualquier acción o respuesta, el agente DEBE:
 
 ---
 
+## 👤 Autor
+
+**Andres Delgado** — Software Architect & AI Governance Specialist
+
+- GitHub: [@Andres34r7y4](https://github.com/Andres34r7y4)
+- LinkedIn: [andresdelgado-architect](https://www.linkedin.com/in/andresdelgado-architect/)
+- Repositorio: [themis](https://github.com/Andres34r7y4/themis)
+
+---
+
+## 💖 Soporte y Donaciones
+
+¿Te gusta el proyecto? Considera sponsorear el desarrollo:
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/Andres34r7y4?style=for-the-badge&logo=github)](https://github.com/sponsors/Andres34r7y4)
+[![PayPal](https://img.shields.io/badge/PayPal-Donate-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/paypalme/andresdelgado)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Donate-orange.svg?style=for-the-badge&logo=buymeacoffee)](https://www.buymeacoffee.com/andres34r7y4)
+
+---
+
 ## 📜 Licencia
 
 Este proyecto está bajo la licencia [MIT](LICENSE). Puedes usarlo, modificarlo y distribuirlo libremente en proyectos personales y comerciales.
@@ -139,6 +181,12 @@ Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para conocer las reglas de contribuc
 ## 📊 Versiones
 
 Consulta [CHANGELOG.md](CHANGELOG.md) para ver el historial de cambios y versiones.
+
+---
+
+## 🔒 Seguridad
+
+Consulta [docs/SECURITY.md](docs/SECURITY.md) para conocer nuestra política de seguridad y cómo reportar vulnerabilidades.
 
 ---
 
