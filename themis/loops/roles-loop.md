@@ -41,7 +41,7 @@ The system starts in:
 ## 2) Canonical Inputs / Outputs
 
 Planner reads:
-- `themis/agents/objective.md` (if it exists)
+- `themis/objective.md` (if it exists)
 - `./themis/tasks/tasks.md`
 - (optional) backlog/improvements if they exist in docs
 
