@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "themis-governance"
+version = "1.0.0"
+description = "Protocolo de Gobernanza Determinista para Agentes LLM - Kernel de gobernanza multi-rol"
+readme = "README.md"
+authors = [
+    { name = "Themis Contributors" }
+]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Quality Assurance",
+    "Intended Audience :: Developers"
+]
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+themis = "cli:main"
