@@ -1,7 +1,7 @@
 # Guía de uso del sistema `core`
 
 ## Principio obligatorio
-Antes de cualquier acción o respuesta del agente, se debe leer y obedecer el contrato central en `/agents/AGENTS.md` y luego las reglas del loop y del rol correspondiente.
+Antes de cualquier acción o respuesta del agente, se debe leer y obedecer el contrato central en `/themis/AGENTS.md` y luego las reglas del loop y del rol correspondiente.
 
 ## Propósito de `core`
 `core` centraliza el contrato, roles, loops, tareas y salidas de IA para ejecutar ciclos controlados con trazabilidad, cambios mínimos y seguridad.
@@ -21,7 +21,7 @@ Cuando el usuario indica explícitamente “solo ejecutar tasks.md”, se arranc
 El Planner genera backlog desde documentación y luego convierte tareas prioritarias en `tasks.md`.
 
 ### 5) Index-first
-Uso del repo index en `/agents/outputs/repo_index/` para inspección rápida (sin lectura masiva de archivos).
+Uso del repo index en `/themis/outputs/repo_index/` para inspección rápida (sin lectura masiva de archivos).
 
 ## Flujo de trabajo (alto nivel)
 1. **Pre-flight**: leer `AGENTS.md`, `roles-loop.md` y rol activo; imprimir `PRE-FLIGHT OK`, `ROLE`, `MODE`, `CYCLE_ID`.
@@ -33,20 +33,20 @@ Uso del repo index en `/agents/outputs/repo_index/` para inspección rápida (si
 ## Pruebas sin tocar código (no invasivas)
 Estas pruebas son **documentales** y **no ejecutan** automatizaciones del dominio:
 - Verificar que existan las rutas clave:
-  - `/agents/AGENTS.md`
-  - `/agents/loops/roles-loop.md`
-  - `/agents/roles/`
-  - `/agents/tasks/tasks.md`
-  - `/agents/tasks/archives/task-archives.md`
+  - `/themis/AGENTS.md`
+  - `/themis/loops/roles-loop.md`
+  - `/themis/roles/`
+  - `/themis/tasks/tasks.md`
+  - `/themis/tasks/archives/task-archives.md`
 - Confirmar que los templates existan:
-  - `/agents/in/humans/template-task.md`
-  - `/agents/in/humans/template-backlog.md`
+  - `/themis/in/humans/template-task.md`
+  - `/themis/in/humans/template-backlog.md`
 - Confirmar que el backlog activo y el histórico existan:
-  - `/agents/outputs/ia/reports/backlog_mejoras.md`
-  - `/agents/outputs/ia/reports/backlog_archives.md`
+  - `/themis/outputs/ia/reports/backlog_mejoras.md`
+  - `/themis/outputs/ia/reports/backlog_archives.md`
 - Validar que el repo index esté presente si se requiere flujo index-first:
-  - `/agents/outputs/repo_index/index.sqlite`
-  - `/agents/outputs/repo_index/queries/README.md`
+  - `/themis/outputs/repo_index/index.sqlite`
+  - `/themis/outputs/repo_index/queries/README.md`
 
 ## Planificación del flujo (rol Planner)
 El Planner debe:
@@ -59,19 +59,19 @@ El Planner debe:
 ## Ejemplos de uso (sin ejecución)
 
 ### A) Generar backlog
-- Entrada: `agents/agents/objetivo.md`
-- Salida: `/agents/outputs/ia/reports/backlog_mejoras.md`
+- Entrada: `themis/themis/objetivo.md`
+- Salida: `/themis/outputs/ia/reports/backlog_mejoras.md`
 
 ### B) Convertir backlog en tareas
-- Entrada: `/agents/outputs/ia/reports/backlog_mejoras.md`
-- Salida: `/agents/tasks/tasks.md` (máx. 3 tareas)
+- Entrada: `/themis/outputs/ia/reports/backlog_mejoras.md`
+- Salida: `/themis/tasks/tasks.md` (máx. 3 tareas)
 
 ### C) Diagnóstico de bug
 - Entrada: síntoma claro + `tasks.md`
-- Salida: `/agents/outputs/ia/reports/debug/debug_<CYCLE_ID>.md`
+- Salida: `/themis/outputs/ia/reports/debug/debug_<CYCLE_ID>.md`
 
 ### D) Ejecución de tasks
-- Entrada: `/agents/tasks/tasks.md`
+- Entrada: `/themis/tasks/tasks.md`
 - Salida: cambios mínimos + `task-archives.md` actualizado
 
 ## Reglas de seguridad (resumen)
@@ -83,15 +83,15 @@ El Planner debe:
 
 ## Extender el sistema con nuevos roles
 Para agregar un rol se requiere:
-1. Actualizar `/agents/AGENTS.md` declarando el rol y sus límites.
-2. Crear `/agents/roles/<rol>.md`.
-3. Actualizar `/agents/loops/roles-loop.md` con estados y handoffs.
+1. Actualizar `/themis/AGENTS.md` declarando el rol y sus límites.
+2. Crear `/themis/roles/<rol>.md`.
+3. Actualizar `/themis/loops/roles-loop.md` con estados y handoffs.
 4. Asegurar el pre-flight y la precedencia del contrato central.
 
 ## Checklist rápido del Planner (ciclo de documentación)
-- [ ] Leí `/agents/AGENTS.md`
-- [ ] Leí `/agents/loops/roles-loop.md`
-- [ ] Leí `/agents/roles/planner.md`
+- [ ] Leí `/themis/AGENTS.md`
+- [ ] Leí `/themis/loops/roles-loop.md`
+- [ ] Leí `/themis/roles/planner.md`
 - [ ] No toqué código
 - [ ] No ejecuté comandos del dominio
 - [ ] Documenté el flujo y ejemplos
