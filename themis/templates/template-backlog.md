@@ -1,27 +1,8 @@
-# backlog_mejoras.md
+# Backlog Template
 
-## backlog de tareas candidatas
-
-### tarea
-id: auto
-titulo:
-descripcion:
-
-tipo:
-feature | mejora | refactor | investigacion
-
-impacto:
-alto | medio | bajo
-
-esfuerzo:
-alto | medio | bajo
-
-riesgo:
-alto | medio | bajo
-
-depende_de:
-[]
-
-aceptacion:
-- criterio 1
-- criterio 2
+## Backlog Entry
+- **ID:** <backlog-id>
+- **Description:** <what needs to be done>
+- **Priority:** high|medium|low
+- **Source:** <where this came from>
+- **Status:** candidate|planned|completed

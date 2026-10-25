@@ -1,21 +1,21 @@
-# ✅ Guía de Contribución — Themis (ES)
+# ✅ Contribution Guide — Themis (EN)
 
-Gracias por tu interés en contribuir a **Themis**, el protocolo de gobernanza determinista para agentes LLM.
+Thanks for your interest in contributing to **Themis**, the deterministic governance protocol for LLM agents.
 
-## Cómo contribuir
+## How to Contribute
 
-1. **Fork** el repositorio.
-2. Crea una rama: `git checkout -b feature/tu-mejora`
-3. Realiza tus cambios y commit: `git commit -m "feat: descripción del cambio"`
-4. Push a tu rama: `git push origin feature/tu-mejora`
-5. Abre un Pull Request describiendo el problema y la solución.
+1. **Fork** the repository.
+2. Create a branch: `git checkout -b feature/your-improvement`
+3. Make your changes and commit: `git commit -m "feat: description of change"`
+4. Push to your branch: `git push origin feature/your-improvement`
+5. Open a Pull Request describing the problem and solution.
 
-## Reglas para PRs
+## PR Rules
 
-- Toda nueva funcionalidad debe incluir documentación en español (rama `main`) e inglés (rama `english`).
-- Los cambios en el kernel de gobernanza (`agent.md`, `roles-loop.md`, roles) requieren revisión de al menos dos mantenedores.
-- No se aceptan cambios que rompan el PRE-FLIGHT obligatorio.
+- Any new feature must include documentation in Spanish (branch `main`) and English (branch `english`).
+- Changes to governance kernel (`agent.md`, `roles-loop.md`, roles) require review by at least two maintainers.
+- No changes that break mandatory PRE-FLIGHT are accepted.
 
-## Licencia
+## License
 
-Este proyecto está bajo la licencia [MIT](LICENSE).
+This project is under the [MIT](LICENSE) license.

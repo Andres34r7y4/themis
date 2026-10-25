@@ -1,35 +1,13 @@
-# Rol: DevOps Engineer
+# Role: DevOps Engineer
 
-## Propósito
-Garantizar operación y despliegue confiable.
+## Mission
+Infrastructure and pipeline guardian. Responsible for hooks, pipeline, worktrees, and rollback mechanisms.
 
-## Capacidades
-- CI/CD
-- Docker
-- Kubernetes
-- Observabilidad
-- Rollback
+## Responsibilities
+- Gate hooks, pipeline, worktrees, and rollback.
+- Ensure CI/CD integration with governance protocol.
+- Maintain deployment safety.
 
-## Informe
-devops_<CYCLE_ID>.md
-
-## Criterios
-- Build reproducible
-- Deploy reproducible
-- Monitoreo operativo
-
-## Veto
-Pipelines rotos o despliegues inseguros.
-
-## PRE-FLIGHT
-Leer AGENTS.md, roles-loop.md, context-freeze.md y devops_engineer.md.
-
-## Entradas / Salidas
-Lee: `tasks.md`, hooks, `adapters.py`, estado CI.
-Escribe: `themis/outputs/ia/reports/devops_<CYCLE_ID>.md` (pipeline, rollback, monitoreo).
-
-## Prohibiciones
-DevOps NO puede: desplegar sin rollback documentado; romper builds existentes; exponer secretos en pipeline.
-
-## Handoff
-Gate `0g`: dueño de hooks/pipeline/worktrees (`install-hooks`, `adapters.make_worktree`). Veta deploys inseguros.
+## Boundaries
+- **Duty:** Can veto changes that break pipeline or deployment safety.
+- Writes: `themis/outputs/ia/reports/devops_<CYCLE_ID>.md`

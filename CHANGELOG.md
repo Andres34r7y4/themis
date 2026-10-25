@@ -1,21 +1,21 @@
-# Registro de Cambios — Themis
+# Change Log — Themis
 
 ## [v1.0.0] — 2026-10-24
 
-### 🚀 Lanzamiento inicial
+### 🚀 Initial Release
 
-- **Kernel de gobernanza**: `agent.md` con PRE-FLIGHT obligatorio y separación de roles.
-- **Loop de orquestación**: `roles-loop.md` con estados `PLANNER_PHASE`, `EXECUTOR_PHASE`, `DEBUGGER_PHASE`, `DISENADOR_PHASE`, `STOP`.
-- **Roles definidos**: Planner, Executor, Debugger, Security Engineer, Architect, QA Engineer, Documentator, DevOps, Product Owner, Diseñador.
-- **Contexto congelado**: `context-freeze.md` para snapshots deterministas.
-- **Bucle de memoria**: `memory-loop.md` para trazabilidad de ejecuciones.
-- **Plantillas**: templates de task, backlog, prompt inicial y run-roles-loop.
-- **GUIA de uso**: Documentación operativa completa.
-- **Imagen de portada**: Banner oficial en `docs/assets/themis-banner.jpeg`.
-- **Multilingüe**: Rama `main` en español (default), rama `english` en inglés.
+- **Governance Kernel**: `agent.md` with mandatory PRE-FLIGHT and role separation.
+- **Orchestration Loop**: `roles-loop.md` with states `PLANNER_PHASE`, `EXECUTOR_PHASE`, `DEBUGGER_PHASE`, `DESIGNER_PHASE`, `STOP`.
+- **Roles defined**: Planner, Executor, Debugger, Security Engineer, Architect, QA Engineer, Documentator, DevOps, Product Owner, Designer.
+- **Frozen Context**: `context-freeze.md` for deterministic snapshots.
+- **Memory Loop**: `memory-loop.md` for execution traceability.
+- **Templates**: task, backlog, initial prompt, and run-roles-loop templates.
+- **User Guide**: Complete operational documentation.
+- **Banner Image**: Official banner in `docs/assets/themis-banner.jpeg`.
+- **Multilingual**: Branch `main` in Spanish (default), branch `english` in English.
 
-## Próximos pasos
+## Next Steps
 
-- Versión en inglés de toda la documentación.
-- Ejemplos de integración con proveedores LLM (OpenAI, Anthropic, DeepSeek, Ollama).
-- CLI de inicialización de gobernanza (`themis init`).
+- English version of all documentation.
+- Integration examples with LLM providers (OpenAI, Anthropic, DeepSeek, Ollama).
+- CLI for governance initialization (`themis init`).

@@ -1,150 +1,150 @@
 ![Themis Banner](docs/assets/themis-banner.jpeg)
 
-# ⚖️ Themis — Protocolo de Gobernanza Determinista para Agentes LLM
+# ⚖️ Themis — Deterministic Governance Protocol for LLM Agents
 
-> **Rama principal (`main`) en español. Rama `english` con documentación traducida al inglés.**
+> **Default branch (`main`) in Spanish. Branch `english` with documentation translated to English.**
 
-Themis es un protocolo de gobernanza autónomo, determinístico y multi-rol para cualquier repositorio que utilice agentes basados en LLM. Su propósito es hacer **predecible el camino de la IA en producción** mediante pautas obligatorias que definen quién decide, quién ejecuta y quién audita.
-
----
-
-## 🎯 El Problema
-
-Los agentes LLM actuales operan como "caja negra": ejecutan comandos, modifican archivos y toman decisiones sin un marco de gobernanza estricto. Esto genera:
-- ❌ Cambios no verificables en producción
-- ❌ Falta de trazabilidad de quién tomó qué decisión
-- ❌ Sin contención de daños ante errores
-- ❌ Confusión entre roles de planificación, ejecución y auditoría
+Themis is an autonomous, deterministic, multi-role governance protocol for any repository using LLM-based agents. Its purpose is to make **the AI's path in production predictable** through mandatory guidelines that define who decides, who executes, and who audits.
 
 ---
 
-## ✅ La Solución: Themis
+## 🎯 The Problem
 
-Themis introduce un **kernel de gobernanza** (`agent.md`) que el LLM debe consumir obligatoriamente antes de cualquier acción. Define un flujo de estados cerrado y obligatorio que garantiza previsibilidad.
-
-### Características principales
-
-| Característica | Descripción |
-|--------------|-------------|
-| 🔒 **PRE-FLIGHT Obligatorio** | Ningún agente actúa sin declarar ROLE, CYCLE_ID y MODE |
-| 🏗️ **Separación de Roles** | Planner, Executor, Debugger, Security, QA, Architect, Documentator, DevOps, Product Owner |
-| 🔄 **Loop de Estados** | PLANNER → EXECUTOR → STOP con fases controladas |
-| ❄️ **Context Freeze** | Snapshots deterministas antes de ejecutar cambios |
-| 🛡️ **Anti-catástrofe** | Bloqueo automático si una tarea toca >5 archivos o es no atómica |
-| 📋 **Trazabilidad total** | Bitácora en `task-archives.md` con CYCLE_ID, archivos tocados y comandos reales |
-| 🧩 **Agnóstico** | Funciona con cualquier LLM (OpenAI, Anthropic, DeepSeek, Ollama, etc.) |
+Current LLM agents operate as a "black box": they execute commands, modify files, and make decisions without a strict governance framework. This generates:
+- ❌ Unverifiable changes in production
+- ❌ Lack of traceability of who made which decision
+- ❌ No damage containment on errors
+- ❌ Confusion between planning, execution, and auditing roles
 
 ---
 
-## 📁 Estructura del Repositorio
+## ✅ The Solution: Themis
+
+Themis introduces a **governance kernel** (`agent.md`) that the LLM must consume obligatorily before any action. It defines a closed and mandatory state flow that guarantees predictability.
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+| 🔒 **Mandatory PRE-FLIGHT** | No agent acts without declaring ROLE, CYCLE_ID, and MODE |
+| 🏗️ **Role Separation** | Planner, Executor, Debugger, Security, QA, Architect, Documentator, DevOps, Product Owner |
+| 🔄 **State Loop** | PLANNER → EXECUTOR → STOP with controlled phases |
+| ❄️ **Context Freeze** | Deterministic snapshots before executing changes |
+| 🛡️ **Anti-Catastrophe** | Automatic blocking if task touches >5 files or is non-atomic |
+| 📋 **Full Traceability** | Log in `task-archives.md` with CYCLE_ID, files touched, and real commands |
+| 🧩 **Agnostic** | Works with any LLM (OpenAI, Anthropic, DeepSeek, Ollama, etc.) |
+
+---
+
+## 📁 Repository Structure
 
 ```
 themis/
 ├── docs/
 │   └── assets/
-│       └── themis-banner.jpeg      # Imagen de portada oficial
+│       └── themis-banner.jpeg      # Official banner image
 ├── themis/
-│   ├── agent.md                    # Kernel de gobernanza (contrato central)
-│   ├── PATHS.md                    # Fuente única de rutas del sistema
+│   ├── agent.md                    # Governance kernel (central contract)
+│   ├── PATHS.md                    # Single source of system paths
 │   ├── loops/
-│   │   ├── roles-loop.md           # Orquestación de estados y fases
-│   │   ├── context-freeze.md       # Congelación de contexto
-│   │   └── memory-loop.md          # Bucle de memoria y trazabilidad
+│   │   ├── roles-loop.md           # State and phase orchestration
+│   │   ├── context-freeze.md       # Context freezing
+│   │   └── memory-loop.md          # Memory loop and traceability
 │   ├── roles/
-│   │   ├── planner.md              # Rol: Planeador
-│   │   ├── executor.md             # Rol: Ejecutor
-│   │   ├── debugger.md             # Rol: Depurador
-│   │   ├── security_engineer.md    # Rol: Seguridad
-│   │   ├── architect.md            # Rol: Arquitecto
-│   │   ├── qa_engineer.md          # Rol: QA
-│   │   ├── documentator.md         # Rol: Documentador
-│   │   ├── devops_engineer.md      # Rol: DevOps
-│   │   ├── product_owner.md        # Rol: Product Owner
-│   │   └── disenador.md            # Rol: Diseñador
+│   │   ├── planner.md              # Role: Planner
+│   │   ├── executor.md             # Role: Executor
+│   │   ├── debugger.md             # Role: Debugger
+│   │   ├── security_engineer.md    # Role: Security Engineer
+│   │   ├── architect.md            # Role: Architect
+│   │   ├── qa_engineer.md          # Role: QA Engineer
+│   │   ├── documentator.md         # Role: Documentator
+│   │   ├── devops_engineer.md      # Role: DevOps Engineer
+│   │   ├── product_owner.md        # Role: Product Owner
+│   │   └── disenador.md            # Role: Designer
 │   ├── tasks/
-│   │   ├── tasks.md                # Tareas activas del ciclo
+│   │   ├── tasks.md                # Active cycle tasks
 │   │   └── archives/
-│   │       └── task-archives.md    # Bitácora de tareas completadas
+│   │       └── task-archives.md    # Completed tasks log
 │   └── templates/
-│       ├── prompt-inicial.md       # Prompt de inicialización
-│       ├── run-roles-loop.md       # Ejecución del loop de roles
-│       ├── template-task.md        # Plantilla de tarea
-│       └── template-backlog.md     # Plantilla de backlog
-├── LICENSE                         # Licencia MIT
-├── README.md                       # Este archivo
-├── CONTRIBUTING.md                 # Guía de contribución
-└── CHANGELOG.md                    # Registro de cambios
+│       ├── prompt-inicial.md       # Initialization prompt
+│       ├── run-roles-loop.md       # Roles loop execution
+│       ├── template-task.md        # Task template
+│       └── template-backlog.md     # Backlog template
+├── LICENSE                         # MIT License
+├── README.md                       # This file
+├── CONTRIBUTING.md                 # Contribution Guide
+└── CHANGELOG.md                    # Change Log
 ```
 
 ---
 
-## 🚀 Inicio Rápido
+## 🚀 Quick Start
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/tu-usuario/themis.git
+git clone https://github.com/your-username/themis.git
 cd themis
 ```
 
-### 2. Leer el Kernel de Gobernanza
+### 2. Read the Governance Kernel
 
-El archivo `themis/agent.md` es el **contrato central**. Todo agente debe leerlo antes de actuar:
+The file `themis/agent.md` is the **central contract**. Every agent must read it before acting:
 
 ```markdown
-# PRE-FLIGHT (OBLIGATORIO)
-Antes de realizar cualquier acción o respuesta, el agente DEBE:
-1) Identificar y declarar: ROLE, CYCLE_ID, MODE
-2) Leer y obedecer estrictamente: agent.md → roles-loop.md → roles/<ROL>.md
-3) Imprimir: PRE-FLIGHT OK
+# PRE-FLIGHT (MANDATORY)
+Before taking any action or response, the agent MUST:
+1) Identify and declare: ROLE, CYCLE_ID, MODE
+2) Read and strictly obey: agent.md → roles-loop.md → roles/<ROLE>.md
+3) Print: PRE-FLIGHT OK
 ```
 
-### 3. Ejecutar un ciclo de gobernanza
+### 3. Execute a governance cycle
 
-1. **PLANNER_PHASE**: El Planner descompone el objetivo en tareas atómicas en `tasks.md`
-2. **EXECUTOR_PHASE**: El Executor implementa SOLO lo definido en `tasks.md`
-3. **STOP**: El ciclo termina cuando las tareas están completadas o se alcanza el límite de 3 tareas por ciclo
-
----
-
-## 🏛️ Roles y Responsabilidades
-
-| Rol | Responsabilidad Principal | Puede tocar código |
-|-----|--------------------------|-------------------|
-| **Planner** | Descompone objetivos, define backlog y tareas atómicas | ❌ No |
-| **Executor** | Implementa cambios mínimos y verificables | ✅ Sí (solo tasks.md) |
-| **Debugger** | Diagnostica bugs, produce evidencia, no aplica fixes definitivos | ❌ No |
-| **Security Engineer** | Valida seguridad en todo ciclo con cambios | ❌ No (solo veto) |
-| **QA Engineer** | Valida aceptación pre-STOP en ciclos con código | ❌ No (solo veto) |
-| **Architect** | Gate cuando el ciclo toca estructura, contratos o dependencias | ❌ No (solo veto) |
-| **Documentator** | Valida documentación del entregable | ❌ No (solo veto) |
-| **DevOps** | Gate de hooks, pipeline, worktrees y rollback | ❌ No (solo veto) |
-| **Product Owner** | Gate pre-planificación (valor y aceptación) | ❌ No (solo veto) |
-| **Diseñador** | Propone lo visual con criterios medibles | ❌ No (solo veto) |
+1. **PLANNER_PHASE**: Planner decomposes objective into atomic tasks in `tasks.md`
+2. **EXECUTOR_PHASE**: Executor implements ONLY what is defined in `tasks.md`
+3. **STOP**: Cycle ends when tasks are complete or max 3 tasks per cycle reached
 
 ---
 
-## 📜 Licencia
+## 🏛️ Roles and Responsibilities
 
-Este proyecto está bajo la licencia [MIT](LICENSE). Puedes usarlo, modificarlo y distribuirlo libremente en proyectos personales y comerciales.
+| Role | Main Responsibility | Can touch code |
+|------|---------------------|----------------|
+| **Planner** | Decomposes objectives, defines backlog and atomic tasks | ❌ No |
+| **Executor** | Implements minimal and verifiable changes | ✅ Yes (only tasks.md) |
+| **Debugger** | Diagnoses bugs, produces evidence, does not apply definitive fixes | ❌ No |
+| **Security Engineer** | Validates security in all cycles with changes | ❌ No (veto only) |
+| **QA Engineer** | Validates acceptance pre-STOP in code cycles | ❌ No (veto only) |
+| **Architect** | Gate when cycle touches structure, contracts, or dependencies | ❌ No (veto only) |
+| **Documentator** | Validates deliverable documentation | ❌ No (veto only) |
+| **DevOps** | Gate of hooks, pipeline, worktrees, and rollback | ❌ No (veto only) |
+| **Product Owner** | Gate pre-planning (value and acceptance) | ❌ No (veto only) |
+| **Designer** | Proposes visual with measurable criteria | ❌ No (veto only) |
 
 ---
 
-## 🤝 Contribuir
+## 📜 License
 
-Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para conocer las reglas de contribución, el flujo de trabajo y cómo enviar Pull Requests.
+This project is under the [MIT](LICENSE) license. You can use, modify, and distribute it freely in personal and commercial projects.
 
 ---
 
-## 📊 Versiones
+## 🤝 Contributing
 
-Consulta [CHANGELOG.md](CHANGELOG.md) para ver el historial de cambios y versiones.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution rules, workflow, and how to submit Pull Requests.
+
+---
+
+## 📊 Versions
+
+See [CHANGELOG.md](CHANGELOG.md) for change history and versions.
 
 ---
 
 <div align="center">
 
-**Themis** — Gobernanza determinista para la IA.  
-Hecho con ⚖️ para sistemas predecibles.
+**Themis** — Deterministic governance for AI.  
+Made with ⚖️ for predictable systems.
 
 </div>

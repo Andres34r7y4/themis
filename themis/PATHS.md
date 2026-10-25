@@ -1,6 +1,6 @@
-# PATHS.md — fuente única de rutas
+# PATHS.md — Single source of paths
 
-## RAÍCES
+## ROOTS
 RUTA_AGENTS = themis/
 RUTA_OUTPUTS = themis/outputs/
 RUTA_OUTPUTS_IA = themis/outputs/ia/
@@ -31,15 +31,15 @@ RUTA_REPO_INDEX_QUERIES = themis/outputs/repo_index/queries/
 RUTA_REPO_INDEX_CATALOGO = themis/outputs/repo_index/queries/catalog.json
 RUTA_REPO_INDEX_README = themis/outputs/repo_index/queries/README.md
 
-## TEMPLATES HUMANOS
+## HUMAN TEMPLATES
 RUTA_TEMPLATE_TASK = themis/in/humans/template-task.md
 RUTA_TEMPLATE_BACKLOG = themis/in/humans/template-backlog.md
 RUTA_RUN_ROLES_LOOP = themis/in/humans/run-roles-loop.md
 RUTA_PROMPT_INICIAL = themis/in/humans/prompt-inicial.md
 
-## DOCUMENTACIÓN
-RUTA_README_AGENTS = themis/README.md
+## DOCUMENTATION
+RUTA_README_THEMIS = themis/README.md
 RUTA_GUIA_USO = themis/docs/guia-uso.md
 
-## MEMORIA
+## MEMORY
 RUTA_MEMORIA = themis/outputs/ia/memory/memory.md

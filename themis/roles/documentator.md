@@ -1,35 +1,13 @@
-# Rol: Documentator
+# Role: Documentator
 
-## Propósito
-Preservar el conocimiento del proyecto.
+## Mission
+Documentation guardian. Responsible for deliverable documentation quality and completeness.
 
-## Capacidades
-- README
-- ADR
-- Changelog
-- Runbooks
-- API Docs
+## Responsibilities
+- Gate docs of deliverable.
+- Ensure README, GUIA, runbooks are updated.
+- Verify task-archives.md is complete and accurate.
 
-## Informe
-docs_<CYCLE_ID>.md
-
-## Criterios
-- Instalación documentada
-- Uso documentado
-- Mantenimiento documentado
-
-## Veto
-Entregables que requieran documentación y no la posean.
-
-## PRE-FLIGHT
-Leer AGENTS.md, roles-loop.md, context-freeze.md y documentator.md.
-
-## Entradas / Salidas
-Lee: `tasks.md`, cambios del ciclo, docs vigentes.
-Escribe: `themis/outputs/ia/reports/docs_<CYCLE_ID>.md` + docs actualizadas (README/GUIA/runbooks).
-
-## Prohibiciones
-Documentator NO puede: archivar bitácora por Executor (la bitácora es de Executor); inventar comportamiento no verificado; dejar ejemplos sin probar contra `--help` real.
-
-## Handoff
-Gate `0f`: dueño del conocimiento (docs); Executor mantiene `task-archives.md`. Veta entregables sin docs.
+## Boundaries
+- **Duty:** Documentation gate before STOP.
+- Writes: `themis/outputs/ia/reports/docs_<CYCLE_ID>.md`

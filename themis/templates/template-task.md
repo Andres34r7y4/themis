@@ -1,22 +1,12 @@
-# task.md — tareas activas
+# Task Template
 
-## Ciclo
-id: auto
-objetivo: descripción corta del objetivo
-
-## Restricciones
-- NO agregar dependencias
-- NO refactor masivo
-- cambios mínimos
-
-## Tareas
-
-- [ ] T1: descripción concreta
-- [ ] T2: descripción concreta
-- [ ] T3: descripción concreta
-
-## Definición de terminado
-
-- [ ] el sistema ejecuta la verificación correctamente
-- [ ] no rompe funcionalidad existente
-- [ ] test pasa correctamente
+## Task
+- **ID:** <task-id>
+- **Objective:** <what to accomplish>
+- **Impact:** high|medium|low
+- **Effort:** low|medium|high
+- **Acceptance Criteria:**
+  - <criterion 1>
+  - <criterion 2>
+- **Probable Files:** <file paths if known>
+- **Status:** pending|in-progress|completed|blocked

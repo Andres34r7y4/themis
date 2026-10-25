@@ -1,16 +1,11 @@
-Seguí estrictamente el contrato `./themis/AGENTS.md`.
+# Run Roles Loop
 
-Ejecutá el `roles-loop` definido en:
-./themis/loops/roles-loop.md
+Instructions for executing the roles governance loop:
 
-Reglas de ejecución:
-- Iniciar siempre en `PLANNER_PHASE`
-- Usar `CYCLE_ID` con timestamp ISO local
-- En cada fase imprimir:
-  ROLE
-  CYCLE_ID
-  MODE: roles-loop
-
-Cumplir el handoff automático entre Planner y Executor.
-
-Detenerse únicamente cuando `roles-loop.md` indique STOP.
+1. Start in PLANNER_PHASE
+2. Planner creates tasks.md with max 3 atomic tasks
+3. Handoff to EXECUTOR_PHASE
+4. Executor implements minimal changes
+5. QA/Security gates validate
+6. Archive in task-archives.md
+7. Return to PLANNER_PHASE or STOP

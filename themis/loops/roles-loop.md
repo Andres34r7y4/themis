@@ -1,257 +1,251 @@
-# roles-loop.md — Orquestación Planner ↔ Executor (V1)
+# roles-loop.md — Planner ↔ Executor Orchestration (V1)
 
-## 0) Pre-flight (OBLIGATORIO)
-Antes de cualquier acción, el sistema DEBE:
-1) leer `./themis/agent.md`
-2) leer `./themis/loops/roles-loop.md`
-3) leer `./themis/roles/planner.md` o `./themis/roles/debugger.md` o `./themis/roles/executor.md` según corresponda
-4) imprimir una línea de estado:
-   - `ROLE: planner` o `ROLE: debugger` o `ROLE: executor`
+## 0) Pre-flight (MANDATORY)
+Before any action, the system MUST:
+1) read `./themis/agent.md`
+2) read `./themis/loops/roles-loop.md`
+3) read `./themis/roles/planner.md` or `./themis/roles/debugger.md` or `./themis/roles/executor.md` according to the case
+4) print a status line:
+   - `ROLE: planner` or `ROLE: debugger` or `ROLE: executor`
    - `CYCLE_ID: <id>`
    - `MODE: roles-loop`
 
-Regla dura:
-- Si hay conflicto entre roles-loop / roles/* y `AGENTS.md`, **prevalece `AGENTS.md`**.
+Hard rule:
+- If there is a conflict between roles-loop / roles/* and `agent.md`, **`agent.md` prevails**.
 
 ---
 
-## 1) Estados del loop
+## 1) Loop States
 
-Estados válidos:
+Valid states:
 - `PLANNER_PHASE`
 - `DEBUGGER_PHASE`
-- `DISENADOR_PHASE`
+- `DESIGNER_PHASE`
 - `EXECUTOR_PHASE`
 - `STOP`
 
-El sistema inicia en:
+The system starts in:
 
-- `PLANNER_PHASE` para ciclos normales (`feature`, `backlog`, `analisis`)
-- `DEBUGGER_PHASE` si el usuario indica explícitamente un ciclo de tipo:
+- `PLANNER_PHASE` for normal cycles (`feature`, `backlog`, `analysis`)
+- `DEBUGGER_PHASE` if the user explicitly indicates a cycle of type:
   - `bug`
-  - `diagnostico`
-  - `analisis_dinamico`
-  y ya existe un síntoma suficientemente definido
-- `DISENADOR_PHASE` si el ciclo es de tipo `diseno` o la tarea trae brief visual
-- `PLANNER_PHASE` si el bug todavía debe descomponerse o aclararse antes del diagnóstico
-- `EXECUTOR_PHASE` solo si el usuario indica explícitamente “solo ejecutar tasks.md”
+  - `diagnosis`
+  - `dynamic_analysis`
+  and there is already a sufficiently defined symptom
+- `DESIGNER_PHASE` if the cycle is of type `design` or the task brings a visual brief
+- `PLANNER_PHASE` if the bug still needs to be decomposed or clarified before diagnosis
+- `EXECUTOR_PHASE` only if the user explicitly says "only execute tasks.md"
 
 ---
 
-## 2) Entradas / salidas canónicas
-Planner lee:
-- `themis/themis/objetivo.md` (si existe)
+## 2) Canonical Inputs / Outputs
+
+Planner reads:
+- `themis/agents/objective.md` (if it exists)
 - `./themis/tasks/tasks.md`
-- (opcional) backlog/mejoras si existiera en docs
+- (optional) backlog/improvements if they exist in docs
 
-Planner escribe:
-- `./themis/tasks/tasks.md` (máx 3 tareas por ciclo, siguiendo template)
-- (opcional) notas de planificación en outputs (solo si el contrato lo permite)
+Planner writes:
+- `./themis/tasks/tasks.md` (max 3 tasks per cycle, following template)
+- (optional) planning notes in outputs (only if the contract allows)
 
-Debugger lee:
-- `./themis/tasks/tasks.md` (si existe ciclo activo)
-- reporte previo del Planner (si existe)
-- repo real (archivos reales)
-- `repo_index` / outputs estructurales si existen
-- síntoma declarado por el usuario o por Planner
+Debugger reads:
+- `./themis/tasks/tasks.md` (if active cycle exists)
+- previous Planner report (if exists)
+- real repo (real files)
+- `repo_index` / structural outputs if they exist
+- symptom declared by user or by Planner
 
-Debugger escribe:
-- `./themis/outputs/ia/reports/debug_<CYCLE_ID>.md` (informe obligatorio)
-- (opcional) trazas mínimas o cambios temporales de diagnóstico, solo si el contrato y el ciclo lo permiten
-- (opcional) recomendaciones para partición o handoff a Executor
+Debugger writes:
+- `./themis/outputs/ia/reports/debug_<CYCLE_ID>.md` (mandatory report)
+- (optional) minimum traces or temporary diagnostic changes, only if contract and cycle allow
+- (optional) recommendations for partition or handoff to Executor
 
-Diseñador lee:
-- `./themis/tasks/tasks.md` (brief visual del ciclo)
-- `tokens.yaml` / temas vigentes + referencias del brief
-- repo real (solo lo visual alcanzado por el brief)
+Designer reads:
+- `./themis/tasks/tasks.md` (visual brief of the cycle)
+- `tokens.yaml` / current themes + brief references
+- real repo (only visual reached by brief)
 
-Diseñador escribe:
-- `./themis/outputs/ia/reports/design_<CYCLE_ID>.md` (informe obligatorio + veto)
-- (opcional) propuestas con criterios medibles y tokens (sin implementar si la tarea no lo autoriza)
+Designer writes:
+- `./themis/outputs/ia/reports/design_<CYCLE_ID>.md` (mandatory report + veto)
+- (optional) proposals with measurable criteria and tokens (without implementing if task does not authorize)
 
-Executor lee:
-- `./themis/tasks/tasks.md` (ÚNICA fuente de tareas)
-- repo real (archivos reales)
+Executor reads:
+- `./themis/tasks/tasks.md` (UNIQUE source of tasks)
+- real repo (real files)
 
-Executor escribe:
-- cambios mínimos en código (solo para cumplir tasks.md)
-- `./themis/tasks/archives/task-archives.md` (bitácora obligatoria)
-- actualiza `./themis/tasks/tasks.md` removiendo tareas completadas
-
----
-
-## 3) Reglas del Planner (PLANNER_PHASE)
-Objetivo: convertir objetivos/backlog en tareas atómicas.
-
-Checklist:
-1) NO tocar código.
-2) NO ejecutar smoke test.
-3) Crear/actualizar `tasks.md`:
-   - ordenadas por prioridad: **Impacto alto + Esfuerzo bajo** primero
-   - luego: alto+medio, alto+alto, medio+bajo, medio+medio, bajo+* al final
-4) Cada tarea debe incluir:
-   - impacto: alto|medio|bajo
-   - esfuerzo: bajo|medio|alto
-   - criterio de terminado
-   - archivos probables a tocar (si se pueden inferir sin inventar)
-
-Condición de handoff:
-- Si `tasks.md` tiene ≥ 1 tarea, pasar a `EXECUTOR_PHASE`.
-- Si `tasks.md` queda vacío, pasar a `STOP`.
+Executor writes:
+- minimal code changes (only to fulfill tasks.md)
+- `./themis/tasks/archives/task-archives.md` (mandatory log)
+- updates `./themis/tasks/tasks.md` removing completed tasks
 
 ---
 
-## 4) Reglas del Debugger (DEBUGGER_PHASE)
-
-Objetivo: diagnosticar bugs sin implementar fixes definitivos y producir evidencia utilizable.
+## 3) Planner Rules (PLANNER_PHASE)
+Objective: convert objectives/backlog into atomic tasks.
 
 Checklist:
-1) NO refactorizar.
-2) NO hacer cambios permanentes de lógica salvo autorización explícita.
-3) Alinear el síntoma:
-   - esperado
-   - observado
-   - contexto
-   - alcance
-4) Formular entre 2 y 5 hipótesis verificables.
-5) Generar `debug_<CYCLE_ID>.md` con:
-   - síntoma
-   - zona del problema
-   - hipótesis
-   - evidencia
-   - resultado
-   - próximo paso
-6) Si requiere cambios de debug:
-   - deben ser mínimos
-   - reversibles
-   - documentados como temporales
-7) Si el diagnóstico requiere sandbox, preferir worktree temporal.
+1) NO touching code.
+2) NO executing smoke tests.
+3) Create/update `tasks.md`:
+   - ordered by priority: **High Impact + Low Effort** first
+   - then: high+medium, high+high, medium+low, medium+medium, low+* at the end
+4) Each task must include:
+   - impact: high|medium|low
+   - effort: low|medium|high
+   - completion criteria
+   - probable files to touch (if they can be inferred without inventing)
 
-Condición de handoff:
-- pasar a `EXECUTOR_PHASE` solo si:
-  - existe `debug_<CYCLE_ID>.md`
-  - hay causa raíz probable o hipótesis dominante sustentada
-  - el próximo paso está suficientemente delimitado
-- volver a `PLANNER_PHASE` si:
-  - el bug sigue ambiguo
-  - la tarea debe partirse
-  - se requiere input humano
-- pasar a `STOP` si:
-  - no hay síntoma reproducible
-  - falta entorno
-  - el ciclo queda bloqueado
+Handoff condition:
+- If `tasks.md` has ≥ 1 task, pass to `EXECUTOR_PHASE`.
+- If `tasks.md` is empty, pass to `STOP`.
 
 ---
 
-## 5) Reglas del Executor (EXECUTOR_PHASE)
-Objetivo: ejecutar SOLO lo que está en `tasks.md`.
+## 4) Debugger Rules (DEBUGGER_PHASE)
+
+Objective: diagnose bugs without implementing definitive fixes and produce usable evidence.
 
 Checklist:
-0) Si el ciclo es de bug, leer obligatoriamente `debug_<CYCLE_ID>.md` antes de tocar código.
-0b) Si la tarea es visual (brief/`diseno`), leer obligatoriamente `design_<CYCLE_ID>.md` antes de tocar lo visual.
-1) Aplicar Tree workflow de `AGENTS.md` (3 pasadas).
-2) Implementar cambios mínimos.
-3) Verificación mínima (smoke test) SOLO si aplica al tipo de ciclo.
-4) Archivar en `task-archives.md` con:
+1) NO refactoring.
+2) NO permanent logic changes unless explicit authorization.
+3) Align the symptom:
+   - expected
+   - observed
+   - context
+   - scope
+4) Formulate between 2 and 5 verifiable hypotheses.
+5) Generate `debug_<CYCLE_ID>.md` with:
+   - symptom
+   - problem area
+   - hypotheses
+   - evidence
+   - result
+   - next step
+6) If debug changes are required:
+   - they must be minimal
+   - reversible
+   - documented as temporary
+7) If diagnosis requires sandbox, prefer temporary worktree.
+
+Handoff condition:
+- pass to `EXECUTOR_PHASE` only if:
+  - `debug_<CYCLE_ID>.md` exists
+  - there is probable root cause or dominant hypothesis supported
+  - next step is sufficiently delimited
+- return to `PLANNER_PHASE` if:
+  - bug remains ambiguous
+  - task must be split
+  - human input is required
+- pass to `STOP` if:
+  - no reproducible symptom
+  - missing environment
+  - cycle remains blocked
+
+---
+
+## 5) Executor Rules (EXECUTOR_PHASE)
+Objective: execute ONLY what is in `tasks.md`.
+
+Checklist:
+0) If the cycle is a bug, read obligatorily `debug_<CYCLE_ID>.md` before touching code.
+0b) If the task is visual (brief/`design`), read obligatorily `design_<CYCLE_ID>.md` before touching visual.
+1) Apply Tree workflow of `agent.md` (3 passes).
+2) Implement minimal changes.
+3) Minimum verification (smoke test) ONLY if it applies to cycle type.
+4) Archive in `task-archives.md` with:
    - CYCLE_ID
-   - objetivo
-   - tareas completadas ✅
-   - archivos tocados (rutas reales)
-   - cómo probar (comandos reales)
-   - TODOs / riesgos
+   - objective
+   - completed tasks ✅
+   - files touched (real paths)
+   - how to test (real commands)
+   - TODOs / risks
 
-Condición de handoff:
-- Si quedan tareas pendientes en `tasks.md`:
-  - volver a `PLANNER_PHASE` SOLO si hay ambigüedad / tarea no atómica / anti-catástrofe.
-  - si son tareas claras restantes, puede continuar en `EXECUTOR_PHASE` hasta max 3 tareas/ciclo.
-- Si `tasks.md` queda vacío: `STOP`.
+Handoff condition:
+- If pending tasks remain in `tasks.md`:
+  - return to `PLANNER_PHASE` ONLY if ambiguity / non-atomic task / anti-catastrophe.
+  - if clear remaining tasks, can continue in `EXECUTOR_PHASE` until max 3 tasks/cycle.
+- If `tasks.md` is empty: `STOP`.
 
-En ciclos de tipo `bug`, `diagnostico` o `analisis_dinamico`, el Executor NO debe actuar si no existe un informe previo del Debugger:
+In cycle types `bug`, `diagnosis` or `dynamic_analysis`, Executor MUST NOT act without a prior Debugger report:
 
 `./themis/outputs/ia/reports/debug_<CYCLE_ID>.md`
 
-Ese informe funciona como fuente obligatoria de contexto técnico para la implementación del fix.
+That report functions as mandatory technical context source for fix implementation.
 
-En ciclos de tipo `diseno` o tareas con brief visual, el Executor NO debe tocar lo visual si no existe un informe previo del Diseñador:
+In cycle types `design` or tasks with visual brief, Executor MUST NOT touch visual without a prior Designer report:
 
 `./themis/outputs/ia/reports/design_<CYCLE_ID>.md`
 
-## 5c) Gates de roles de soporte (sin fases nuevas)
+## 5c) Support Role Gates (no new phases)
 
-Los 6 roles de soporte operan como gates del checklist Executor (además del `0b` visual):
+The 6 support roles operate as Executor checklist gates (besides `0b` visual):
 
-- `0c` **Security**: hace cumplir `AGENTS.md §4` en todo ciclo con cambios.
-- `0d` **QA**: valida aceptación pre-STOP en ciclos con código.
-- `0e` **Architect**: gate cuando el ciclo toca estructura, contratos o dependencias.
-- `0f` **Documentator**: gate de docs del entregable (la bitácora sigue en Executor).
-- `0g` **DevOps**: gate de hooks/pipeline/worktrees y rollback.
-- `0h` **Product Owner**: gate pre-Planificación (valor y aceptación de candidatas).
+- `0c` **Security**: enforces `agent.md §4` in all cycles with changes.
+- `0d` **QA**: validates acceptance pre-STOP in code cycles.
+- `0e` **Architect**: gate when cycle touches structure, contracts, or dependencies.
+- `0f` **Documentator**: gate of deliverable docs (log remains in Executor).
+- `0g` **DevOps**: gate of hooks/pipeline/worktrees and rollback.
+- `0h` **Product Owner**: gate pre-Planning (value and acceptance of candidates).
 
-Cada gate se salda con su informe (`security_/qa_/architecture_/docs_/devops_/product_<CYCLE_ID>.md`) o con veto fundado que devuelve a `PLANNER_PHASE`. Precedencia de vetos en `AGENTS.md §12.7`.
+Each gate is settled with its report (`security_/qa_/architecture_/docs_/devops_/product_<CYCLE_ID>.md`) or with founded veto that returns to `PLANNER_PHASE`. Veto precedence in `agent.md §12.7`.
 
-## 5b) Reglas del Diseñador (DISENADOR_PHASE)
+## 5b) Designer Rules (DESIGNER_PHASE)
 
-Objetivo: investigar y proponer lo visual con teoría y criterios medibles, sin implementar el rediseño salvo autorización en la tarea.
+Objective: investigate and propose the visual with theory and measurable criteria, without implementing the redesign unless authorized in the task.
 
 Checklist:
-1) Exigir brief mínimo (objetivo, audiencia/contexto, restricciones, referencias). Sin brief: STOP + pedido de input.
-2) Fase research sin dibujar (referencias reales + teoría del rol, 3–6 bullets).
-3) Proponer máx 2 variantes con criterios medibles + 1 recomendada, en `design_<CYCLE_ID>.md`.
-4) Registrar paleta/espaciado en tokens (nombres, vía Planner si crea llaves).
-5) Vetar por escrito lo que no cumpla los criterios, con alternativa.
+1) Require minimum brief (objective, audience/context, restrictions, references). Without brief: STOP + input request.
+2) Research phase without drawing (real references + role theory, 3-6 bullets).
+3) Propose max 2 variants with measurable criteria + 1 recommended, in `design_<CYCLE_ID>.md`.
+4) Register palette/spacing in tokens (names, via Planner if creating keys).
+5) Veto in writing what does not meet criteria, with alternative.
 
-Condición de handoff:
-- pasar a `EXECUTOR_PHASE` con informe + tokens + criterios cuando la propuesta está lista para implementar.
-- volver a `PLANNER_PHASE` si falta brief, el diseño debe partirse o hay conflicto de contrato.
-- pasar a `STOP` si no hay entorno de verificación o el humano debe decidir.
+Handoff condition:
+- pass to `EXECUTOR_PHASE` with report + tokens + criteria when proposal is ready to implement.
+- return to `PLANNER_PHASE` if missing brief, design must be split, or contract conflict.
+- pass to `STOP` if no verification environment or human must decide.
 
 ---
 
-## 6) Anti-catástrofe (corte automático)
-Antes de implementar, evaluar:
-- cantidad estimada de archivos a modificar
-- cambios estructurales
-- atomicidad de la tarea
+## 6) Anti-Catastrophe (automatic cut)
+Before implementing, evaluate:
+- estimated number of files to modify
+- structural changes
+- task atomicity
 
-Condiciones de bloqueo:
-- más de 5 archivos
-- refactor estructural
-- cambio no autorizado de arquitectura
-- tarea ambigua / no atómica
+Blocking conditions:
+- more than 5 files
+- structural refactor
+- unauthorized architecture change
+- ambiguous / non-atomic task
 
-Si se dispara:
-1) NO ejecutar cambios.
-2) registrar en `task-archives.md` (con CYCLE_ID y motivo)
-3) proponer partición en tareas más pequeñas (vuelve a `PLANNER_PHASE`)
+If triggered:
+1) DO NOT execute changes.
+2) register in `task-archives.md` (with CYCLE_ID and reason)
+3) propose partition into smaller tasks (returns to `PLANNER_PHASE`)
 
 ---
 
 ## 7) Stop conditions
 
-El loop termina cuando:
-- `tasks.md` está vacío, o
-- se dispara anti-catástrofe y se requiere input humano, o
-- se alcanzó el máximo de 3 tareas para el ciclo actual, o
-- un ciclo de bug queda bloqueado por:
-  - falta de síntoma claro
-  - falta de entorno reproducible
-  - evidencia insuficiente tras diagnóstico mínimo
-  - necesidad de decisión humana
+The loop ends when:
+- `tasks.md` is empty, or
+- anti-catastrophe triggered and human input required, or
+- max 3 tasks reached for current cycle, or
+- bug cycle remains blocked by:
+  - missing clear symptom
+  - missing reproducible environment
+  - insufficient evidence after minimum diagnosis
+  - need for human decision
 
 ---
 
-## 8) Verificación y presupuesto (best practices multi-agente)
+## 8) Verification and budget (best practices multi-agent)
 
-Roles obligatorios por ciclo: **Planner** (descompone), **Executor**
-(ejecuta un paso por vez), **Verifier** (chequeo determinístico:
-tests, validación, typecheck — nunca solo "se ve bien").
+Mandatory roles per cycle: **Planner** (decomposes), **Executor** (executes one step at a time), **Verifier** (deterministic check: tests, validation, typecheck — never just "looks good").
 
-1) **Evidencia antes de STOP**: ningún ciclo cierra sin un chequeo
-   ejecutado por código (suite verde, `validate`, ping honesto).
-2) **Loop budget**: máx 2 rondas Executor→revisión; a la 3ª se escala
-   a humano con el desacuerdo por escrito.
-3) **Dehallucinación comunicativa**: si al Executor le falta un dato
-   del plan, pregunta al rol que corresponda ANTES de inventarlo.
-4) **Mínimo privilegio por rol**: cada rol solo toca sus artefactos
-   (Planner: tasks/plan; Executor: código; Debugger: reportes).
-   Sin llaves ni secretos en artefactos, jamás.
+1) **Evidence before STOP**: no cycle closes without a check executed by code (green suite, `validate`, honest ping).
+2) **Loop budget**: max 2 Executor→review rounds; at 3rd escalate to human with disagreement in writing.
+3) **Communicative dehallucination**: if Executor lacks a plan data, ask corresponding role BEFORE inventing it.
+4) **Minimum privilege per role**: each role only touches their artifacts (Planner: tasks/plan; Executor: code; Debugger: reports). No keys or secrets in artifacts, ever.

@@ -1,21 +1,20 @@
-# task.md — tareas activas
+# task.md — Active Tasks
 
-## Ciclo
+## Cycle
 id: standby
-objetivo: Sin tareas pendientes — ciclo 2026-09-23-21 completo (upgrade posicional), loop en STOP
+objective: No pending tasks — cycle complete, loop in STOP
 
-## Restricciones
-- NO agregar dependencias
-- NO refactor masivo
-- cambios mínimos
+## Restrictions
+- NO adding dependencies
+- NO massive refactor
+- minimal changes
 
-## Tareas
+## Tasks
 
-Vacío — 1/1 tareas del ciclo 2026-09-23-21 completadas (suite 37/37).
+Empty — 1/1 cycle tasks completed.
 
-## Definición de terminado
+## Definition of Done
 
-- [x] T1 del ciclo 2026-09-23-21 en task-archives.md
-- [x] suite 37/37 + ambas formas verificadas en binario
-- [x] push a master + `pipx reinstall`
-- [x] dashboard backlog-201/202 disponible en backlog_mejoras.md para próximo Planner
+- [x] All cycle tasks archived in task-archives.md
+- [x] Test suite verified
+- [x] Changes pushed
