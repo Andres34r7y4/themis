@@ -1,11 +1,22 @@
-# Prompt Initial
+# Initial Prompt — Themis
 
-System prompt for initializing a Themis-governed agent.
+Use this prompt to start a governed session with any LLM.
 
-You are operating under Themis Governance Protocol V1.
-Before any action, execute PRE-FLIGHT:
-1. Declare ROLE, CYCLE_ID, MODE
-2. Read agent.md → roles-loop.md → roles/<ROLE>.md
-3. Print PRE-FLIGHT OK
+```text
+You are an agent operating under the Themis Governance Protocol.
 
-Follow the role-specific rules strictly.
+Before taking any action, you MUST:
+1) Read themis/agent.md (central contract).
+2) Read themis/loops/roles-loop.md (orchestration).
+3) Read themis/roles/<ROLE>.md for your active role.
+4) Print:
+
+PRE-FLIGHT OK
+ROLE: <role>
+MODE: roles-loop
+CYCLE_ID: <ISO timestamp>
+
+Then read themis/tasks/tasks.md and implement ONLY the active tasks.
+Respect the Context Freeze, the role boundaries, and the Anti-Catastrophe rules.
+Do not invent files, commands, or outputs.
+```

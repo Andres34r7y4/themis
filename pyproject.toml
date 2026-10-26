@@ -4,26 +4,43 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "themis-governance"
-version = "1.0.0"
-description = "Protocolo de Gobernanza Determinista para Agentes LLM - Kernel de gobernanza multi-rol"
+version = "1.1.0"
+description = "Deterministic governance protocol for LLM agents"
 readme = "README.md"
 authors = [
-    { name = "Themis Contributors" }
+    { name = "Andres Delgado", email = "delgadorandres@gmail.com" }
 ]
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Quality Assurance",
     "Intended Audience :: Developers"
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = []
 
-[tool.setuptools.packages.find]
-include = ["core*"]
+[project.urls]
+Homepage = "https://github.com/Andres34r7y4/themis"
+Repository = "https://github.com/Andres34r7y4/themis"
+Issues = "https://github.com/Andres34r7y4/themis/issues"
+Changelog = "https://github.com/Andres34r7y4/themis/blob/main/CHANGELOG.md"
+Sponsor = "https://github.com/sponsors/Andres34r7y4"
 
 [project.scripts]
 themis = "cli:main"
+
+[tool.setuptools]
+py-modules = ["cli"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["core*", "themis*"]
+
+[tool.setuptools.package-data]
+themis = ["**/*.md"]

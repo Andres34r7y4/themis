@@ -4,6 +4,8 @@ This module implements the core validation logic that every agent must pass
 before executing any action under the Themis protocol.
 """
 
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -32,49 +34,45 @@ class GovernanceKernel:
 
     VALID_MODES = {"roles-loop", "manual"}
 
-    REQUIRED_READ_ORDER = [
+    REQUIRED_FILES = [
         "agent.md",
+        "PATHS.md",
         "loops/roles-loop.md",
-        "roles/{role}.md",
+        "loops/context-freeze.md",
+        "loops/memory-loop.md",
+        "roles/planner.md",
+        "roles/executor.md",
+        "roles/debugger.md",
+        "roles/security_engineer.md",
+        "roles/architect.md",
+        "roles/qa_engineer.md",
+        "roles/documentator.md",
+        "roles/devops_engineer.md",
+        "roles/product_owner.md",
+        "roles/designer.md",
+        "tasks/tasks.md",
+        "tasks/archives/task-archives.md",
+        "templates/prompt-inicial.md",
+        "templates/run-roles-loop.md",
+        "templates/template-task.md",
+        "templates/template-backlog.md",
     ]
 
-    def __init__(self, base_dir: Path):
+    def __init__(self, base_dir: Path, base_dir_name: str = "themis"):
         self.base_dir = Path(base_dir).resolve()
-        self.themis_dir = self.base_dir / "themis"
+        self.base_dir_name = base_dir_name
+        self.themis_dir = self.base_dir / base_dir_name
 
     def validate_structure(self) -> list[str]:
         """Check that all required governance files exist.
 
-        Returns a list of missing files (empty if all present).
+        Returns a list of missing file paths (empty when all are present).
         """
-        missing: list[str] = []
-        required = [
-            "agent.md",
-            "PATHS.md",
-            "loops/roles-loop.md",
-            "loops/context-freeze.md",
-            "loops/memory-loop.md",
-            "roles/planner.md",
-            "roles/executor.md",
-            "roles/debugger.md",
-            "roles/security_engineer.md",
-            "roles/architect.md",
-            "roles/qa_engineer.md",
-            "roles/documentator.md",
-            "roles/devops_engineer.md",
-            "roles/product_owner.md",
-            "roles/designer.md",
-            "tasks/tasks.md",
-            "tasks/archives/task-archives.md",
-            "templates/prompt-inicial.md",
-            "templates/run-roles-loop.md",
-            "templates/template-task.md",
-            "templates/template-backlog.md",
+        return [
+            str(self.themis_dir / rel)
+            for rel in self.REQUIRED_FILES
+            if not (self.themis_dir / rel).is_file()
         ]
-        for rel in required:
-            if not (self.themis_dir / rel).exists():
-                missing.append(str(self.themis_dir / rel))
-        return missing
 
     def pre_flight(
         self,
@@ -85,8 +83,8 @@ class GovernanceKernel:
         """Execute the PRE-FLIGHT protocol.
 
         Args:
-            role: The agent role (planner, executor, debugger, etc.)
-            mode: Operation mode (roles-loop or manual)
+            role: The agent role (planner, executor, debugger, etc.).
+            mode: Operation mode (roles-loop or manual).
             cycle_id: ISO timestamp. If None, generates one.
 
         Returns:
@@ -95,39 +93,33 @@ class GovernanceKernel:
         Raises:
             ValueError: If role or mode is invalid, or structure is incomplete.
         """
-        # Validate role
         if role not in self.VALID_ROLES:
             raise ValueError(
                 f"Invalid role: '{role}'. Must be one of: {sorted(self.VALID_ROLES)}"
             )
 
-        # Validate mode
         if mode not in self.VALID_MODES:
             raise ValueError(
                 f"Invalid mode: '{mode}'. Must be one of: {sorted(self.VALID_MODES)}"
             )
 
-        # Validate structure
         missing = self.validate_structure()
         if missing:
             raise ValueError(
-                f"Governance structure incomplete. Missing files: {missing}"
+                "Governance structure incomplete. Missing files: " + ", ".join(missing)
             )
 
-        # Generate cycle ID if not provided
         if cycle_id is None:
             cycle_id = datetime.now(timezone.utc).isoformat()
 
-        # Build the read order for this role
         read_order = [
             str(self.themis_dir / "agent.md"),
             str(self.themis_dir / "loops" / "roles-loop.md"),
             str(self.themis_dir / "roles" / f"{role}.md"),
         ]
 
-        # Verify all read-order files exist
         for path in read_order:
-            if not Path(path).exists():
+            if not Path(path).is_file():
                 raise ValueError(f"Required contract file not found: {path}")
 
         return {

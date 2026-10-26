@@ -1,20 +1,25 @@
-# task.md — Active Tasks
+# tasks.md — Active Tasks
 
 ## Cycle
+
+```text
 id: standby
-objective: No pending tasks — cycle complete, loop in STOP
+objective: No active tasks — the governance loop is in STOP
+```
 
 ## Restrictions
-- NO adding dependencies
-- NO massive refactor
-- minimal changes
+
+- Do not add dependencies.
+- Do not perform massive refactors.
+- Keep changes minimal and reversible.
 
 ## Tasks
 
-Empty — 1/1 cycle tasks completed.
+Empty — no active cycle.
 
 ## Definition of Done
 
-- [x] All cycle tasks archived in task-archives.md
-- [x] Test suite verified
-- [x] Changes pushed
+- [ ] Every cycle task is archived in `task-archives.md`.
+- [ ] Verification evidence is recorded.
+- [ ] `tasks.md` is left consistent (completed tasks removed).
+- [ ] Changes are published only when the cycle explicitly requires it.

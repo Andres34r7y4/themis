@@ -1,71 +1,130 @@
-# Guía de Uso del Sistema Themis (EN)
+# Themis User Guide
 
-## Principio Obligatorio
-Before any agent action or response, read and obey the central contract in `/themis/agent.md` and then the loop rules and corresponding role.
+## Mandatory principle
 
-## Purpose of Core
-`themis/` centralizes the contract, roles, loops, tasks, and AI outputs to execute controlled cycles with traceability, minimal changes, and security.
+Before any agent action or response, read and obey the central contract in
+`themis/agent.md`, then the loop rules and the active role document.
 
-## Operation Modes
+## Purpose
 
-### 1) Normal Cycle (feature / improvement / analysis)
+`themis/` centralizes the contract, roles, loops, tasks, and AI outputs needed to
+run controlled cycles with traceability, minimal changes, and security.
+
+## Installation
+
+```bash
+# From a clone (editable install)
+python -m pip install -e .
+themis --version
+
+# Or run without installing
+python cli.py --help
+```
+
+## Quick start
+
+```bash
+# Scaffold governance into a repository
+themis init --repo ./my-project
+
+# Validate the structure
+themis validate --repo ./my-project
+
+# Run PRE-FLIGHT for a role
+themis run-cycle --role planner --repo ./my-project
+```
+
+`themis init` copies the governance assets into `<repo>/themis` and refuses to
+overwrite them unless `--force` is passed. Use `--base-dir` to choose a
+different directory name.
+
+## Operation modes
+
+### 1) Normal cycle (feature / improvement / analysis)
+
 Starts in `PLANNER_PHASE` and follows `roles-loop` until `STOP`.
 
-### 2) Bug / Diagnosis Cycle
-Starts in `DEBUGGER_PHASE` when symptom is clear. Debugger produces evidence and Executor only implements with prior report.
+### 2) Bug / diagnosis cycle
 
-### 3) Only task execution
-When user explicitly says "only execute tasks.md", start in `EXECUTOR_PHASE`.
+Starts in `DEBUGGER_PHASE` when the symptom is clear. The Debugger produces
+evidence; the Executor implements only with a prior report.
+
+### 3) Task-only execution
+
+When the user explicitly says "only execute tasks.md", start in
+`EXECUTOR_PHASE`.
 
 ### 4) Backlog → Tasks
-Planner generates backlog from documentation and converts priority tasks to `tasks.md`.
+
+The Planner generates a backlog from documentation and converts at most three
+priority tasks to `tasks.md`.
 
 ### 5) Index-first
-Use repo index in `/themis/outputs/repo_index/` for quick inspection (without massive file reading).
 
-## Workflow (High Level)
-1. **Pre-flight**: Read `agent.md`, `roles-loop.md`, and active role; print `PRE-FLIGHT OK`, `ROLE`, `MODE`, `CYCLE_ID`.
-2. **PASS 1 (Understand)**: Define Freeze Map and minimal plan.
-3. **PASS 2 (Implement)**: Minimal changes (only if applicable).
-4. **PASS 3 (Verify)**: Minimum verification per cycle type.
-5. **Archive**: Register in `task-archives.md` and clear `tasks.md`.
+Use the repository index under `themis/outputs/repo_index/` for quick inspection
+without massive file reading.
 
-## Non-invasive Tests (documentary, no execution)
-Verify key routes exist:
-- `/themis/agent.md`
-- `/themis/loops/roles-loop.md`
-- `/themis/roles/`
-- `/themis/tasks/tasks.md`
-- `/themis/tasks/archives/task-archives.md`
+## Workflow (high level)
 
-## Planner Task Planning
+1. **Pre-flight**: read `agent.md`, `roles-loop.md`, and the active role; print
+   `PRE-FLIGHT OK`, `ROLE`, `MODE`, `CYCLE_ID`.
+2. **PASS 1 (Understand)**: define the Freeze Map and the minimal plan.
+3. **PASS 2 (Implement)**: minimal changes, only when applicable.
+4. **PASS 3 (Verify)**: minimum verification per cycle type.
+5. **Archive**: register the cycle in `task-archives.md` and clean `tasks.md`.
+
+## Structure
+
+```text
+themis/
+├── agent.md                 # Central governance contract
+├── PATHS.md                 # Single source of paths
+├── loops/
+│   ├── roles-loop.md        # State machine and handoffs
+│   ├── context-freeze.md    # Minimum scope per cycle
+│   └── memory-loop.md       # Controlled persistence
+├── roles/                   # Ten role contracts
+├── tasks/
+│   ├── tasks.md             # Active tasks
+│   └── archives/            # Completed cycle log
+├── templates/               # Task, backlog, and prompt templates
+└── outputs/                 # Runtime reports (generated, not required)
+```
+
+## Planner task planning
+
 The Planner must:
-- Read relevant documentation (if applicable).
-- Generate backlog (max 10 atomic tasks).
-- Prioritize by contract (impact ↓, effort ↑, risk ↑, dependencies).
-- Convert to `tasks.md` (max 3 tasks per cycle).
-- NO touching code.
-- NO executing domain commands.
 
-## Security Rules (Summary)
+- read the relevant documentation;
+- generate a backlog of at most 10 atomic tasks;
+- prioritize by impact (desc), effort (asc), risk (asc), dependencies, and ID;
+- convert at most 3 tasks per cycle to `tasks.md`;
+- never touch code and never run domain commands.
+
+## Security rules (summary)
+
 - No exposing credentials or tokens.
 - No adding dependencies without authorization.
-- No modifying core adapters or base interfaces without explicit task.
-- No massive refactor, NO moving folders, NO renaming modules for "cleanup".
-- No inventing data or assuming unverifiable tool outputs.
-- Maintain minimal and reversible changes.
+- No modifying core adapters or base interfaces without an explicit task.
+- No massive refactor, no moving folders, no renaming modules for "cleanup".
+- No inventing data or assuming unverifiable tool output.
+- Keep changes minimal and reversible.
 
-## Extending System with New Roles
+## Extending the system with new roles
+
 To add a role:
-1. Update `/themis/agent.md` declaring the role and its limits.
-2. Create `/themis/roles/<role>.md`.
-3. Update `/themis/loops/roles-loop.md` with states and handoffs.
-4. Ensure pre-flight and central contract precedence.
 
-## Quick Planner Checklist (documentation cycle)
-- [ ] Read `/themis/agent.md`
-- [ ] Read `/themis/loops/roles-loop.md`
-- [ ] Read `/themis/roles/planner.md`
+1. Add it to `themis/agent.md` and `core/kernel.py` (`VALID_ROLES`).
+2. Create `themis/roles/<role>.md` and add it to `core/roles.py`.
+3. Add it to `themis/loops/roles-loop.md` with states and handoffs.
+4. Update `core/kernel.py` required files and the test suite.
+5. Run `python -m unittest discover -s tests -v` and `python cli.py validate`.
+
+## Quick planner checklist
+
+- [ ] Read `themis/agent.md`
+- [ ] Read `themis/loops/roles-loop.md`
+- [ ] Read `themis/roles/planner.md`
 - [ ] Did not touch code
 - [ ] Did not execute domain commands
-- [ ] Documented flow and examples
+- [ ] Documented the flow and examples

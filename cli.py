@@ -1,57 +1,84 @@
-"""Themis CLI — Command-line interface for governance operations.
+"""Themis CLI — command-line interface for governance operations.
 
 Commands:
-    themis init       Scaffold governance structure in a repository
-    themis validate   Validate governance structure and PRE-FLIGHT readiness
+    themis init       Scaffold the governance structure in a repository
+    themis validate   Validate the governance structure and PRE-FLIGHT readiness
     themis run-cycle  Execute PRE-FLIGHT for a given role and mode
 """
 
+from __future__ import annotations
+
+import argparse
+import shutil
 import sys
+from importlib import resources
 from pathlib import Path
 
 from core.kernel import GovernanceKernel
 
+__version__ = "1.1.0"
+
+
+def _assets_dir() -> Path:
+    """Return the directory that contains the bundled governance assets."""
+    return Path(str(resources.files("themis")))
+
+
+def _count_files(path: Path) -> int:
+    return sum(1 for item in path.rglob("*") if item.is_file())
+
 
 def cmd_init(repo: str = ".", base_dir: str = "themis", force: bool = False) -> int:
-    """Initialize Themis governance structure in a repository.
+    """Scaffold the Themis governance structure in a repository.
 
-    Copies the governance templates (agent.md, roles, loops, tasks, templates)
-    into the target repository under the themis/ directory.
+    Copies the bundled governance assets (agent.md, roles, loops, tasks and
+    templates) into ``<repo>/<base_dir>``.
     """
     repo_path = Path(repo).resolve()
-    target = repo_path / base_dir
-
-    if target.exists() and not force:
-        print(f"Governance structure already exists at {target}. Use --force to overwrite.")
+    if not repo_path.is_dir():
+        print(f"Error: repository path does not exist: {repo_path}")
         return 1
 
-    # In a full implementation, this would copy from a bundled template directory.
-    # For now, we validate that the source themis/ exists.
-    source = Path(__file__).parent / "themis"
-    if not source.exists():
-        print(f"Error: Source themis/ directory not found at {source}")
+    source = _assets_dir().resolve()
+    target = (repo_path / base_dir).resolve()
+
+    if source == target:
+        print("Error: target is the Themis source repository itself; nothing to scaffold.")
         return 1
 
+    if target.exists():
+        if not force:
+            print(
+                f"Governance structure already exists at {target}. "
+                "Use --force to overwrite."
+            )
+            return 1
+        shutil.rmtree(target)
+
+    ignore = shutil.ignore_patterns("__init__.py", "__pycache__", "*.pyc")
+    shutil.copytree(source, target, ignore=ignore)
+
+    files = _count_files(target)
     print(f"Themis governance initialized at {target}")
+    print(f"Files created: {files}")
     print("Next steps:")
-    print("  1. Review themis/agent.md (the governance kernel)")
-    print("  2. Run: themis validate")
-    print("  3. Run: themis run-cycle --role planner")
+    print(f"  1. Review {base_dir}/agent.md (the governance kernel)")
+    print(f"  2. Run: themis validate --repo {repo_path} --base-dir {base_dir}")
+    print(f"  3. Run: themis run-cycle --role planner --repo {repo_path}")
     return 0
 
 
 def cmd_validate(repo: str = ".", base_dir: str = "themis") -> int:
     """Validate that the governance structure is complete and PRE-FLIGHT ready."""
     repo_path = Path(repo).resolve()
-    # base_dir is relative to repo_path; kernel looks for base_dir/themis/ internally
-    kernel = GovernanceKernel(repo_path)
+    kernel = GovernanceKernel(repo_path, base_dir_name=base_dir)
 
     missing = kernel.validate_structure()
     if missing:
         print("GOVERNANCE STRUCTURE INCOMPLETE")
         print(f"Missing {len(missing)} required file(s):")
-        for f in missing:
-            print(f"  - {f}")
+        for item in missing:
+            print(f"  - {item}")
         return 1
 
     print("GOVERNANCE STRUCTURE COMPLETE")
@@ -67,13 +94,9 @@ def cmd_run_cycle(
     repo: str = ".",
     base_dir: str = "themis",
 ) -> int:
-    """Execute PRE-FLIGHT for a given role and mode.
-
-    Prints the standard PRE-FLIGHT OK output that agents must display
-    before taking any action.
-    """
+    """Execute PRE-FLIGHT for a given role and mode."""
     repo_path = Path(repo).resolve()
-    kernel = GovernanceKernel(repo_path)
+    kernel = GovernanceKernel(repo_path, base_dir_name=base_dir)
 
     try:
         result = kernel.pre_flight(role=role, mode=mode, cycle_id=cycle_id)
@@ -85,87 +108,85 @@ def cmd_run_cycle(
     return 0
 
 
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="themis",
+        description="Deterministic governance protocol for LLM agents.",
+    )
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    init_parser = subparsers.add_parser(
+        "init", help="Scaffold the governance structure in a repository"
+    )
+    init_parser.add_argument("--repo", default=".", help="Target repository (default: .)")
+    init_parser.add_argument(
+        "--base-dir", default="themis", help="Governance directory name (default: themis)"
+    )
+    init_parser.add_argument(
+        "--force", action="store_true", help="Overwrite an existing governance directory"
+    )
+
+    validate_parser = subparsers.add_parser(
+        "validate", help="Validate governance structure completeness"
+    )
+    validate_parser.add_argument(
+        "--repo", default=".", help="Target repository (default: .)"
+    )
+    validate_parser.add_argument(
+        "--base-dir", default="themis", help="Governance directory name (default: themis)"
+    )
+
+    cycle_parser = subparsers.add_parser(
+        "run-cycle", help="Execute PRE-FLIGHT for a role and mode"
+    )
+    cycle_parser.add_argument(
+        "--role",
+        required=True,
+        choices=sorted(GovernanceKernel.VALID_ROLES),
+        help="Governance role",
+    )
+    cycle_parser.add_argument(
+        "--mode",
+        default="roles-loop",
+        choices=sorted(GovernanceKernel.VALID_MODES),
+        help="Operation mode (default: roles-loop)",
+    )
+    cycle_parser.add_argument(
+        "--cycle-id", default=None, help="ISO timestamp (generated when omitted)"
+    )
+    cycle_parser.add_argument(
+        "--repo", default=".", help="Target repository (default: .)"
+    )
+    cycle_parser.add_argument(
+        "--base-dir", default="themis", help="Governance directory name (default: themis)"
+    )
+
+    return parser
+
+
 def main(argv: list[str] | None = None) -> int:
     """Main CLI entry point."""
-    argv = argv if argv is not None else sys.argv[1:]
+    parser = _build_parser()
+    args = parser.parse_args(argv)
 
-    if not argv:
-        print("Themis Governance CLI v1.0.0")
-        print("")
-        print("Usage: themis <command> [options]")
-        print("")
-        print("Commands:")
-        print("  init           Scaffold governance structure in a repository")
-        print("  validate       Validate governance structure completeness")
-        print("  run-cycle      Execute PRE-FLIGHT for a role and mode")
-        print("")
-        print("Run 'themis <command> --help' for more information.")
-        return 0
-
-    command = argv[0]
-    args = argv[1:]
-
-    if command == "init":
-        repo = "."
-        base_dir = "themis"
-        force = False
-        for i, a in enumerate(args):
-            if a == "--repo" and i + 1 < len(args):
-                repo = args[i + 1]
-            elif a == "--base-dir" and i + 1 < len(args):
-                base_dir = args[i + 1]
-            elif a == "--force":
-                force = True
-        return cmd_init(repo=repo, base_dir=base_dir, force=force)
-
-    elif command == "validate":
-        repo = "."
-        base_dir = "themis"
-        for i, a in enumerate(args):
-            if a == "--repo" and i + 1 < len(args):
-                repo = args[i + 1]
-            elif a == "--base-dir" and i + 1 < len(args):
-                base_dir = args[i + 1]
-        return cmd_validate(repo=repo, base_dir=base_dir)
-
-    elif command == "run-cycle":
-        role = None
-        mode = "roles-loop"
-        cycle_id = None
-        repo = "."
-        base_dir = "themis"
-        i = 0
-        while i < len(args):
-            a = args[i]
-            if a == "--role" and i + 1 < len(args):
-                role = args[i + 1]
-                i += 2
-            elif a == "--mode" and i + 1 < len(args):
-                mode = args[i + 1]
-                i += 2
-            elif a == "--cycle-id" and i + 1 < len(args):
-                cycle_id = args[i + 1]
-                i += 2
-            elif a == "--repo" and i + 1 < len(args):
-                repo = args[i + 1]
-                i += 2
-            elif a == "--base-dir" and i + 1 < len(args):
-                base_dir = args[i + 1]
-                i += 2
-            else:
-                i += 1
-
-        if role is None:
-            print("Error: --role is required for run-cycle")
-            return 1
+    if args.command == "init":
+        return cmd_init(repo=args.repo, base_dir=args.base_dir, force=args.force)
+    if args.command == "validate":
+        return cmd_validate(repo=args.repo, base_dir=args.base_dir)
+    if args.command == "run-cycle":
         return cmd_run_cycle(
-            role=role, mode=mode, cycle_id=cycle_id, repo=repo, base_dir=base_dir
+            role=args.role,
+            mode=args.mode,
+            cycle_id=args.cycle_id,
+            repo=args.repo,
+            base_dir=args.base_dir,
         )
 
-    else:
-        print(f"Unknown command: {command}")
-        print("Available commands: init, validate, run-cycle")
-        return 1
+    parser.print_help()
+    return 1
 
 
 if __name__ == "__main__":
