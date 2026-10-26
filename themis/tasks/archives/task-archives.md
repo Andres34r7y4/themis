@@ -1,13 +1,17 @@
-# task-archives.md — Completed Tasks Log
+# task-archives.md — Bitácora de Tareas Completadas
 
-## Archive Format
-Each completed task entry must include:
-- CYCLE_ID
-- Objective
-- Tasks completed ✅
-- Files touched (real paths)
-- How to test (real commands)
-- TODOs / risks
+## Formato de archivo
 
-## Archives
-(empty — ready for first cycle)
+Cada ciclo completado debe incluir:
+
+- `CYCLE_ID`
+- Objetivo
+- Tareas completadas
+- Archivos tocados (rutas reales)
+- Cómo probar (comandos reales)
+- Evidencia (resumen de salida real)
+- TODOs / riesgos
+
+## Archivos
+
+Aún no hay ciclos completados archivados.

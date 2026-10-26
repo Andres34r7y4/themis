@@ -1,44 +1,54 @@
-# Architecture — Themis Governance System
+# Arquitectura — Sistema de Gobernanza Themis
 
-## System Overview
+## Visión general
 
-Themis is a **deterministic governance kernel** for LLM-based agents. It enforces
-a closed state machine that makes AI behavior predictable in production.
+Themis es un **kernel de gobernanza determinista** para agentes basados en LLM.
+Impone una máquina de estados cerrada que hace predecible el comportamiento de la
+IA en producción.
 
-## Governance Loop (State Machine)
+El repositorio tiene tres capas:
+
+1. **Capa de protocolo** (`themis/*.md`): contrato, loops, roles, tareas y
+   plantillas que consume el LLM.
+2. **Capa de enforcement** (`core/`): módulos Python que validan la estructura,
+   imponen el PRE-FLIGHT e implementan la máquina de estados.
+3. **Capa de herramientas** (`cli.py`): scaffolding, validación y ejecución de
+   PRE-FLIGHT desde la terminal.
+
+## Loop de gobernanza (máquina de estados)
 
 ```mermaid
 stateDiagram-v2
     [*] --> PLANNER_PHASE
-    
-    PLANNER_PHASE --> EXECUTOR_PHASE : tasks.md ≥ 1 task
-    PLANNER_PHASE --> STOP : tasks.md empty
-    
-    EXECUTOR_PHASE --> PLANNER_PHASE : ambiguity / anti-catastrophe
-    EXECUTOR_PHASE --> STOP : tasks.md empty
-    
-    PLANNER_PHASE --> DEBUGGER_PHASE : bug / diagnosis
-    DEBUGGER_PHASE --> EXECUTOR_PHASE : evidence ready
-    DEBUGGER_PHASE --> PLANNER_PHASE : ambiguous / split needed
-    DEBUGGER_PHASE --> STOP : blocked
-    
-    PLANNER_PHASE --> DESIGNER_PHASE : visual / design brief
-    DESIGNER_PHASE --> EXECUTOR_PHASE : proposal ready
-    DESIGNER_PHASE --> PLANNER_PHASE : missing brief / conflict
-    DESIGNER_PHASE --> STOP : blocked
-    
-    EXECUTOR_PHASE --> [*] : cycle complete
-    DEBUGGER_PHASE --> [*] : cycle complete
-    DESIGNER_PHASE --> [*] : cycle complete
+
+    PLANNER_PHASE --> EXECUTOR_PHASE : tasks.md >= 1 tarea
+    PLANNER_PHASE --> DEBUGGER_PHASE : bug / diagnóstico con síntoma definido
+    PLANNER_PHASE --> DESIGNER_PHASE : brief de diseño
+    PLANNER_PHASE --> STOP : tasks.md vacío
+
+    EXECUTOR_PHASE --> PLANNER_PHASE : ambigüedad / anti-catástrofe
+    EXECUTOR_PHASE --> STOP : tasks.md vacío
+
+    DEBUGGER_PHASE --> EXECUTOR_PHASE : evidencia lista
+    DEBUGGER_PHASE --> PLANNER_PHASE : ambiguo / requiere división
+    DEBUGGER_PHASE --> STOP : bloqueado
+
+    DESIGNER_PHASE --> EXECUTOR_PHASE : propuesta aprobada
+    DESIGNER_PHASE --> PLANNER_PHASE : brief incompleto / conflicto
+    DESIGNER_PHASE --> STOP : bloqueado
+
     STOP --> [*]
 ```
 
-## Role Hierarchy
+La representación en runtime vive en `core/loop.py` (`LoopOrchestrator`,
+`VALID_PHASES`, `VALID_TRANSITIONS`).
 
-```
+## Jerarquía de roles
+
+```text
 ┌─────────────────────────────────────────────────────────┐
 │              THEMIS GOVERNANCE KERNEL                   │
-│  (agent.md — PRE-FLIGHT mandatory for all agents)       │
+│  (agent.md — PRE-FLIGHT obligatorio para todo agente)   │
 └─────────────────────────────────────────────────────────┘
                               │
     ┌───────────┬───────────┬───────────┬───────────┐
@@ -52,7 +62,7 @@ stateDiagram-v2
                           (verify)     (docs)
                               │           │
                               ▼           ▼
-                          DEVOPS_ENG  PRODUCT_OWNER
+                          DEVOPS_ENG   PRODUCT_OWNER
                           (pipeline)  (value)
                               │
                               ▼
@@ -60,53 +70,85 @@ stateDiagram-v2
                           (visual)
 ```
 
-## Decision Gates
+## Gates de decisión
 
-| Gate | Role | Veto Power | Blocks |
-|------|------|------------|--------|
-| Security | Security Engineer | Yes | Any unsafe execution |
-| Quality | QA Engineer | Yes | STOP without passing tests |
-| Architecture | Architect | Yes | Structural changes without approval |
-| Documentation | Documentator | Yes | STOP without updated docs |
-| Deployment | DevOps Engineer | Yes | Pipeline-breaking changes |
-| Value | Product Owner | Yes | Low-value task candidates |
-| Visual | Designer | Yes | Unauthorized visual changes |
+| Gate | Rol | Poder de veto | Bloquea |
+|------|-----|---------------|---------|
+| Seguridad | Security Engineer | Sí | Cualquier ejecución insegura |
+| Calidad | QA Engineer | Sí | STOP sin verificación aprobada |
+| Arquitectura | Architect | Sí | Cambios estructurales sin aprobación |
+| Visual | Designer | Sí | Cambios visuales no autorizados |
+| Documentación | Documentator | Sí | STOP sin documentación actualizada |
+| Despliegue | DevOps Engineer | Sí | Cambios que rompen el pipeline |
+| Valor | Product Owner | Sí | Candidatos de bajo valor |
 
-## PRE-FLIGHT Contract
+Precedencia de vetos: `security > qa > architect > designer > documentator > devops > product_owner`.
 
-Every agent action must begin with:
+## Contrato PRE-FLIGHT
 
-```
+Toda acción del agente debe comenzar con:
+
+```text
 PRE-FLIGHT OK
-ROLE: <role>
+ROLE: <rol>
 MODE: <roles-loop|manual>
-CYCLE_ID: <ISO timestamp>
+CYCLE_ID: <timestamp ISO>
 ```
 
-Then read in order:
-1. `themis/agent.md` — Central contract
-2. `themis/loops/roles-loop.md` — State machine
-3. `themis/roles/<ROLE>.md` — Role boundaries
+Luego leer en orden:
 
-## Anti-Catastrophe Rules
+1. `themis/agent.md` — contrato central
+2. `themis/loops/roles-loop.md` — máquina de estados
+3. `themis/roles/<ROL>.md` — límites del rol
 
-Execution is blocked when:
-- More than 5 files would be modified
-- Structural refactor is attempted
-- Unauthorized architecture change
-- Task is ambiguous or non-atomic
+## Reglas anti-catástrofe
 
-## File Paths
+La ejecución se bloquea cuando:
 
-All governance artifacts live under `themis/`:
+- Se modificarían más de 5 archivos.
+- Se intenta un refactor estructural.
+- Se propone un cambio de arquitectura no autorizado.
+- La tarea es ambigua o no atómica.
 
-| Path | Purpose |
-|------|---------|
-| `themis/agent.md` | Central governance contract |
-| `themis/loops/roles-loop.md` | State machine definition |
-| `themis/loops/context-freeze.md` | Context snapshotting |
-| `themis/loops/memory-loop.md` | Execution traceability |
-| `themis/roles/*.md` | Individual role boundaries |
-| `themis/tasks/tasks.md` | Active atomic tasks |
-| `themis/tasks/archives/task-archives.md` | Completed task log |
-| `themis/templates/` | Human-facing templates |
+## Arquitectura del paquete
+
+| Módulo | Responsabilidad |
+|--------|-----------------|
+| `core/kernel.py` | Validación de estructura, rol/modo y PRE-FLIGHT |
+| `core/roles.py` | Registro de roles, límites y rutas de escritura |
+| `core/loop.py` | Fases, transiciones, historial y anti-catástrofe |
+| `cli.py` | `init`, `validate`, `run-cycle`; entry point del paquete |
+| `themis/` | Activos Markdown empaquetados con el paquete |
+
+`themis` es a la vez un directorio de documentación y un paquete Python que
+distribuye los activos Markdown. Esto permite que `themis init` cree la estructura
+incluso cuando la herramienta se instala desde un wheel.
+
+## Rutas de archivos
+
+Todos los artefactos de gobernanza viven bajo `themis/`:
+
+| Ruta | Propósito |
+|------|-----------|
+| `themis/agent.md` | Contrato central de gobernanza |
+| `themis/PATHS.md` | Fuente única de rutas |
+| `themis/loops/roles-loop.md` | Definición de la máquina de estados |
+| `themis/loops/context-freeze.md` | Congelación de contexto |
+| `themis/loops/memory-loop.md` | Trazabilidad de ejecuciones |
+| `themis/roles/*.md` | Límites individuales de cada rol |
+| `themis/tasks/tasks.md` | Tareas atómicas activas |
+| `themis/tasks/archives/task-archives.md` | Bitácora de tareas completadas |
+| `themis/templates/` | Plantillas para humanos |
+| `themis/outputs/` | Informes en runtime (generados) |
+
+## Verificación
+
+El proyecto se verifica con:
+
+```bash
+python -m unittest discover -s tests -v
+python cli.py validate
+```
+
+CI ejecuta las mismas verificaciones en Python 3.10, 3.11 y 3.12, y comprueba que
+el paquete instala y que el entry point `themis` funciona.

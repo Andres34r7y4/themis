@@ -1,22 +1,35 @@
-# task.md — tareas activas
+# Plantilla de Tarea — Themis
 
-## Ciclo
-id: auto
-objetivo: descripción corta del objetivo
+```markdown
+### tarea
+id: AUTO
+título: <título corto e imperativo>
+impacto: alto | medio | bajo
+esfuerzo: bajo | medio | alto
+riesgo: bajo | medio | alto
+depende_de: []
 
-## Restricciones
-- NO agregar dependencias
-- NO refactor masivo
-- cambios mínimos
+#### Objetivo
+<qué debe lograrse y por qué>
 
-## Tareas
+#### Definición de terminado
+- [ ] <criterio verificable>
+- [ ] <criterio verificable>
 
-- [ ] T1: descripción concreta
-- [ ] T2: descripción concreta
-- [ ] T3: descripción concreta
+#### Archivos probables
+- <ruta real o "desconocido">
 
-## Definición de terminado
+#### Verificación
+- Comando: <comando real>
+- Esperado: <resultado observable>
 
-- [ ] el sistema ejecuta la verificación correctamente
-- [ ] no rompe funcionalidad existente
-- [ ] test pasa correctamente
+#### Notas
+<restricción, pregunta abierta o TODO>
+```
+
+## Reglas
+
+- Los IDs se generan automáticamente (`YYYY-MM-DD-XX` para ciclos, `backlog-XXX` para backlog).
+- Máximo 3 tareas activas por ciclo.
+- Cada tarea debe ser atómica y verificable en un ciclo.
+- No listes archivos que no hayas verificado salvo que estén marcados como probables.

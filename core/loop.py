@@ -1,33 +1,36 @@
 """State loop orchestrator for Themis governance.
 
 Implements the deterministic state machine:
-PLANNER_PHASE → EXECUTOR_PHASE → STOP
+PLANNER_PHASE -> EXECUTOR_PHASE -> STOP
 
 With optional branches:
 - DEBUGGER_PHASE (for bug/diagnosis cycles)
 - DESIGNER_PHASE (for visual/design cycles)
 """
 
-from dataclasses import dataclass
+from __future__ import annotations
+
+from dataclasses import dataclass, replace
 from typing import Optional
 
 
-@dataclass
+@dataclass(frozen=True)
 class LoopState:
-    """Current state of the governance loop."""
+    """Immutable snapshot of the governance loop."""
 
     phase: str
     cycle_id: str
     role: str
     tasks_remaining: int = 0
     anti_catastrophe_triggered: bool = False
+    stop_reason: Optional[str] = None
 
     def is_terminal(self) -> bool:
-        """Check if the loop has reached a terminal state."""
+        """Check whether the loop has reached a terminal state."""
         return self.phase == "STOP"
 
 
-# Valid phases in the governance loop
+# Valid phases in the governance loop.
 VALID_PHASES = {
     "PLANNER_PHASE",
     "EXECUTOR_PHASE",
@@ -36,22 +39,22 @@ VALID_PHASES = {
     "STOP",
 }
 
-# Valid transitions: from_phase -> [allowed_to_phases]
+# Valid transitions: from_phase -> [allowed_to_phases].
 VALID_TRANSITIONS = {
-    "PLANNER_PHASE": ["EXECUTOR_PHASE", "STOP"],
+    "PLANNER_PHASE": ["EXECUTOR_PHASE", "DEBUGGER_PHASE", "DESIGNER_PHASE", "STOP"],
     "EXECUTOR_PHASE": ["PLANNER_PHASE", "STOP"],
     "DEBUGGER_PHASE": ["EXECUTOR_PHASE", "PLANNER_PHASE", "STOP"],
     "DESIGNER_PHASE": ["EXECUTOR_PHASE", "PLANNER_PHASE", "STOP"],
-    "STOP": [],  # Terminal
+    "STOP": [],
 }
 
-# Anti-catastrophe blocking conditions
-ANTI_CATASTROPE_CONDITIONS = [
+# Anti-catastrophe blocking conditions.
+ANTI_CATASTROPHE_CONDITIONS = (
     "more than 5 files to modify",
     "structural refactor",
     "unauthorized architecture change",
-    "ambiguous / non-atomic task",
-]
+    "ambiguous or non-atomic task",
+)
 
 
 class LoopOrchestrator:
@@ -78,7 +81,7 @@ class LoopOrchestrator:
             The new LoopState.
 
         Raises:
-            ValueError: If the transition is invalid or the phase is unknown.
+            ValueError: If the phase is unknown or the transition is invalid.
         """
         if new_phase not in VALID_PHASES:
             raise ValueError(
@@ -88,36 +91,38 @@ class LoopOrchestrator:
         current = self.state.phase
         if new_phase not in VALID_TRANSITIONS.get(current, []):
             raise ValueError(
-                f"Invalid transition: {current} → {new_phase}. "
+                f"Invalid transition: {current} -> {new_phase}. "
                 f"Allowed from {current}: {sorted(VALID_TRANSITIONS.get(current, []))}"
             )
 
-        if new_role is None:
-            new_role = self.state.role
-
-        self.state = LoopState(
+        self.state = replace(
+            self.state,
             phase=new_phase,
-            cycle_id=self.cycle_id,
-            role=new_role,
-            tasks_remaining=self.state.tasks_remaining,
-            anti_catastrophe_triggered=self.state.anti_catastrophe_triggered,
+            role=new_role if new_role is not None else self.state.role,
         )
         self.history.append(self.state)
         return self.state
 
-    def trigger_anti_catastrophe(self, reason: str) -> None:
-        """Trigger the anti-catastrophe cutoff.
+    def trigger_anti_catastrophe(self, reason: str) -> LoopState:
+        """Trigger the anti-catastrophe cutoff and stop the cycle.
 
-        Args:
-            reason: Human-readable reason for the cutoff.
+        The reason is stored on the state so it can be archived. Calling this
+        method in a terminal state is a no-op.
         """
-        self.state.anti_catastrophe_triggered = True
-        # Transition to STOP since no changes should be made
-        self.transition("STOP")
+        self.state = replace(
+            self.state,
+            anti_catastrophe_triggered=True,
+            stop_reason=reason,
+        )
+        if self.history:
+            self.history[-1] = self.state
+        if self.state.phase != "STOP":
+            self.transition("STOP")
+        return self.state
 
     def set_tasks_remaining(self, count: int) -> None:
         """Update the number of remaining tasks in the current cycle."""
-        self.state.tasks_remaining = count
+        self.state = replace(self.state, tasks_remaining=count)
 
     def get_summary(self) -> dict:
         """Return a summary of the current loop state."""
@@ -127,6 +132,7 @@ class LoopOrchestrator:
             "current_role": self.state.role,
             "tasks_remaining": self.state.tasks_remaining,
             "anti_catastrophe_triggered": self.state.anti_catastrophe_triggered,
+            "stop_reason": self.state.stop_reason,
             "is_terminal": self.state.is_terminal(),
             "transition_count": len(self.history),
         }

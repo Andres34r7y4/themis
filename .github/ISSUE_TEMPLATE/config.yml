@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Vulnerabilidad de seguridad
+    url: https://github.com/Andres34r7y4/themis/blob/main/docs/SECURITY.md
+    about: Reporta problemas de seguridad en privado, no como issue público.
+  - name: Autor en GitHub
+    url: https://github.com/Andres34r7y4
+    about: Seguí al autor del proyecto para novedades.
+  - name: Autor en LinkedIn
+    url: https://www.linkedin.com/in/andresdelgado-architect/
+    about: Conectá con el autor en LinkedIn.

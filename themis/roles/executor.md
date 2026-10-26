@@ -1,84 +1,60 @@
 # Rol: Executor
 
-## Pre-flight (obligatorio)
-Antes de cualquier acción:
-- Leer `./themis/AGENTS.md`
-- Leer `./themis/loops/roles-loop.md`
-- Leer este archivo (`./themis/roles/executor.md`)
-Luego imprimir: `ROLE: executor` + `CYCLE_ID`.
+## Misión
 
-El Executor implementa tareas definidas en tasks.md.
+Implementar las tareas atómicas definidas por el Planner con cambios mínimos,
+reversibles y verificables.
 
-No genera nuevas tareas ni modifica el backlog.
+## PRE-FLIGHT
 
-## Bootstrap obligatorio (Contrato Central)
+```text
+PRE-FLIGHT OK
+ROLE: executor
+MODE: roles-loop | manual
+CYCLE_ID: <timestamp>
+```
 
-Antes de actuar, este rol DEBE leer y obedecer el contrato central:
-
-- `/themis/AGENTS.md`
-
-Reglas:
-1) Si existe conflicto entre este archivo y `AGENTS.md`, prevalece `AGENTS.md`.
-2) Este archivo NO redefine reglas globales: solo agrega responsabilidades específicas del rol.
-3) Cualquier operación (crear/modificar/archivar) debe respetar restricciones globales del contrato central.
-
-## Loop de roles (Planner ↔ Executor)
-
-El sistema opera como una máquina de estados con dos roles lógicos:
-
-- Planner: `backlog → priorización → tasks.md`
-- Executor: `tasks.md → implementación → verificación → archive + limpieza`
-
-Transiciones:
-A) Planner → Executor:
-- ocurre cuando `tasks.md` contiene tareas atómicas, priorizadas y ejecutables (con IDs y DoD).
-
-B) Executor → Planner:
-- ocurre cuando `tasks.md` queda vacío, o cuando el Executor bloquea una tarea por:
-  - anti-catástrofe,
-  - ambigüedad,
-  - no atomicidad,
-  - violación de restricciones globales.
-
-Regla de bloqueo (Executor):
-- Si una tarea se bloquea, NO ejecutar cambios.
-- Registrar bloqueo en `task-archives.md` y devolver al Planner una propuesta de división en tareas más pequeñas.
-
-Stop condition (anti-loop infinito):
-- Si una tarea vuelve bloqueada al Planner, el Planner propone máximo 3 sub-tareas.
-- Si persiste el bloqueo, se registra como “requiere intervención humana” y se detiene el loop.
+Leer en orden: `themis/agent.md` → `themis/loops/roles-loop.md` → este archivo.
 
 ## Responsabilidades
 
-1. Ejecutar tareas definidas en tasks.md
-2. Implementar cambios mínimos necesarios
-3. Validar funcionamiento mediante verificación mínima
-4. Archivar ciclos ejecutados
+- Implementar solo lo que define `themis/tasks/tasks.md`.
+- Mantener los cambios localizados y fáciles de revertir.
+- Respetar el Context Freeze y los límites anti-catástrofe.
+- Ejecutar la verificación mínima de la sección 6 de `agent.md`.
+- Registrar el trabajo completado en `themis/tasks/archives/task-archives.md`.
+- Eliminar las tareas completadas de `themis/tasks/tasks.md`.
+
+## Límites
+
+- **Puede tocar código:** sí, solo para tareas presentes en `tasks.md`.
+- **Prohibido:** cambiar requisitos, ampliar el alcance, agregar dependencias sin
+  autorización o tocar archivos fuera del Freeze Map.
+- **Escribe:** código fuente, `themis/tasks/tasks.md` y
+  `themis/tasks/archives/task-archives.md`.
 
 ## Entradas
 
-- tasks.md
+- `themis/tasks/tasks.md` (única fuente de tareas)
+- El repositorio real
+- Informes de gates de fases previas (si aplican)
 
 ## Salidas
 
-- cambios en código
-- task-archives.md
-- limpieza de tasks.md
+- Cambios mínimos de código que satisfacen las tareas
+- `themis/tasks/tasks.md` actualizado
+- Bitácora del ciclo en `themis/tasks/archives/task-archives.md`
 
-## Prohibiciones
+## Handoff
 
-El Executor NO debe:
+- Se necesita trabajo nuevo → `PLANNER_PHASE`
+- `tasks.md` vacío, límite de 3 tareas, veto o anti-catástrofe → `STOP`
 
-- generar backlog
-- modificar backlog_mejoras.md
-- redefinir tareas
-- realizar refactor estructural
-- agregar dependencias externas
+## Checklist
 
-## Proceso
-
-1. leer tasks.md
-2. ejecutar tareas pendientes
-3. verificar definición de terminado
-4. archivar ciclo
-5. limpiar tasks.md
+- [ ] Solo se implementaron tareas de `tasks.md`
+- [ ] No hay dependencias no autorizadas
+- [ ] Se respetó el Freeze Map
+- [ ] La verificación se ejecutó y documentó
+- [ ] La bitácora incluye rutas y comandos reales
+- [ ] `tasks.md` quedó consistente

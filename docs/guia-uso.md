@@ -1,97 +1,131 @@
-# Guía de uso del sistema `core`
+# Guía de Uso de Themis
 
 ## Principio obligatorio
-Antes de cualquier acción o respuesta del agente, se debe leer y obedecer el contrato central en `/themis/AGENTS.md` y luego las reglas del loop y del rol correspondiente.
 
-## Propósito de `core`
-`core` centraliza el contrato, roles, loops, tareas y salidas de IA para ejecutar ciclos controlados con trazabilidad, cambios mínimos y seguridad.
+Antes de cualquier acción o respuesta del agente, se debe leer y obedecer el
+contrato central en `themis/agent.md`, luego las reglas del loop y el documento
+del rol activo.
 
-## Formas de uso (modos de operación)
+## Propósito
+
+`themis/` centraliza el contrato, roles, loops, tareas y salidas de IA necesarios
+para ejecutar ciclos controlados con trazabilidad, cambios mínimos y seguridad.
+
+## Instalación
+
+```bash
+# Desde un clon (instalación editable)
+python -m pip install -e .
+themis --version
+
+# O ejecutar sin instalar
+python cli.py --help
+```
+
+## Inicio rápido
+
+```bash
+# Crear la gobernanza en un repositorio
+themis init --repo ./mi-proyecto
+
+# Validar la estructura
+themis validate --repo ./mi-proyecto
+
+# Ejecutar PRE-FLIGHT para un rol
+themis run-cycle --role planner --repo ./mi-proyecto
+```
+
+`themis init` copia los activos de gobernanza en `<repo>/themis` y se niega a
+sobrescribirlos salvo que se pase `--force`. Usá `--base-dir` para elegir otro
+nombre de directorio.
+
+## Modos de operación
 
 ### 1) Ciclo normal (feature / mejora / análisis)
+
 Se inicia en `PLANNER_PHASE` y sigue el `roles-loop` hasta `STOP`.
 
 ### 2) Ciclo de bug / diagnóstico
-Se inicia en `DEBUGGER_PHASE` cuando el síntoma está claro. El Debugger produce evidencia y el Executor solo implementa con informe previo.
+
+Se inicia en `DEBUGGER_PHASE` cuando el síntoma está claro. El Debugger produce
+evidencia; el Executor solo implementa con informe previo.
 
 ### 3) Solo ejecución de tasks
-Cuando el usuario indica explícitamente “solo ejecutar tasks.md”, se arranca en `EXECUTOR_PHASE`.
+
+Cuando el usuario indica explícitamente "solo ejecutar tasks.md", se arranca en
+`EXECUTOR_PHASE`.
 
 ### 4) Backlog → tasks
-El Planner genera backlog desde documentación y luego convierte tareas prioritarias en `tasks.md`.
+
+El Planner genera un backlog a partir de la documentación y convierte como máximo
+tres tareas prioritarias a `tasks.md`.
 
 ### 5) Index-first
-Uso del repo index en `/themis/outputs/repo_index/` para inspección rápida (sin lectura masiva de archivos).
 
-## Flujo de trabajo (alto nivel)
-1. **Pre-flight**: leer `AGENTS.md`, `roles-loop.md` y rol activo; imprimir `PRE-FLIGHT OK`, `ROLE`, `MODE`, `CYCLE_ID`.
-2. **PASADA 1 (Entender)**: definir Freeze Map y plan mínimo.
-3. **PASADA 2 (Implementar)**: cambios mínimos (solo si aplica).
-4. **PASADA 3 (Verificar)**: verificación mínima según tipo de ciclo.
-5. **Archivar**: registrar en `task-archives.md` y limpiar `tasks.md`.
+Usá el índice del repositorio en `themis/outputs/repo_index/` para inspección
+rápida sin lectura masiva de archivos.
 
-## Pruebas sin tocar código (no invasivas)
-Estas pruebas son **documentales** y **no ejecutan** automatizaciones del dominio:
-- Verificar que existan las rutas clave:
-  - `/themis/AGENTS.md`
-  - `/themis/loops/roles-loop.md`
-  - `/themis/roles/`
-  - `/themis/tasks/tasks.md`
-  - `/themis/tasks/archives/task-archives.md`
-- Confirmar que los templates existan:
-  - `/themis/in/humans/template-task.md`
-  - `/themis/in/humans/template-backlog.md`
-- Confirmar que el backlog activo y el histórico existan:
-  - `/themis/outputs/ia/reports/backlog_mejoras.md`
-  - `/themis/outputs/ia/reports/backlog_archives.md`
-- Validar que el repo index esté presente si se requiere flujo index-first:
-  - `/themis/outputs/repo_index/index.sqlite`
-  - `/themis/outputs/repo_index/queries/README.md`
+## Workflow (alto nivel)
 
-## Planificación del flujo (rol Planner)
+1. **Pre-flight**: leer `agent.md`, `roles-loop.md` y el rol activo; imprimir
+   `PRE-FLIGHT OK`, `ROLE`, `MODE`, `CYCLE_ID`.
+2. **PASADA 1 (Entender)**: definir el Freeze Map y el plan mínimo.
+3. **PASADA 2 (Implementar)**: cambios mínimos, solo si aplica.
+4. **PASADA 3 (Verificar)**: verificación mínima según el tipo de ciclo.
+5. **Archivar**: registrar el ciclo en `task-archives.md` y limpiar `tasks.md`.
+
+## Estructura
+
+```text
+themis/
+├── agent.md                 # Contrato central de gobernanza
+├── PATHS.md                 # Fuente única de rutas
+├── loops/
+│   ├── roles-loop.md        # Máquina de estados y handoffs
+│   ├── context-freeze.md    # Alcance mínimo por ciclo
+│   └── memory-loop.md       # Persistencia controlada
+├── roles/                   # Diez contratos de rol
+├── tasks/
+│   ├── tasks.md             # Tareas activas
+│   └── archives/            # Bitácora de ciclos completados
+├── templates/               # Plantillas de tarea, backlog y prompts
+└── outputs/                 # Informes en tiempo de ejecución (generados)
+```
+
+## Planificación de tareas del Planner
+
 El Planner debe:
-- Leer documentación relevante (si aplica).
-- Generar backlog (máx. 10 tareas, atómicas).
-- Priorizar según el contrato (impacto ↓, esfuerzo ↑, riesgo ↑, dependencias).
-- Convertir a `tasks.md` (máx. 3 tareas por ciclo).
-- No tocar código ni ejecutar comandos.
 
-## Ejemplos de uso (sin ejecución)
-
-### A) Generar backlog
-- Entrada: `themis/themis/objetivo.md`
-- Salida: `/themis/outputs/ia/reports/backlog_mejoras.md`
-
-### B) Convertir backlog en tareas
-- Entrada: `/themis/outputs/ia/reports/backlog_mejoras.md`
-- Salida: `/themis/tasks/tasks.md` (máx. 3 tareas)
-
-### C) Diagnóstico de bug
-- Entrada: síntoma claro + `tasks.md`
-- Salida: `/themis/outputs/ia/reports/debug/debug_<CYCLE_ID>.md`
-
-### D) Ejecución de tasks
-- Entrada: `/themis/tasks/tasks.md`
-- Salida: cambios mínimos + `task-archives.md` actualizado
+- leer la documentación relevante;
+- generar un backlog de como máximo 10 tareas atómicas;
+- priorizar por impacto (desc), esfuerzo (asc), riesgo (asc), dependencias e ID;
+- convertir como máximo 3 tareas por ciclo a `tasks.md`;
+- nunca tocar código ni ejecutar comandos de dominio.
 
 ## Reglas de seguridad (resumen)
+
 - No exponer credenciales ni tokens.
 - No agregar dependencias sin autorización.
-- No modificar adaptadores específicos ni la capa base sin tarea explícita.
-- No inventar rutas, módulos o datos.
+- No modificar adaptadores core ni interfaces base sin una tarea explícita.
+- No hacer refactor masivo, ni mover carpetas, ni renombrar módulos por "limpieza".
+- No inventar datos ni asumir salidas de herramientas no verificables.
 - Mantener cambios mínimos y reversibles.
 
 ## Extender el sistema con nuevos roles
-Para agregar un rol se requiere:
-1. Actualizar `/themis/AGENTS.md` declarando el rol y sus límites.
-2. Crear `/themis/roles/<rol>.md`.
-3. Actualizar `/themis/loops/roles-loop.md` con estados y handoffs.
-4. Asegurar el pre-flight y la precedencia del contrato central.
 
-## Checklist rápido del Planner (ciclo de documentación)
-- [ ] Leí `/themis/AGENTS.md`
-- [ ] Leí `/themis/loops/roles-loop.md`
-- [ ] Leí `/themis/roles/planner.md`
+Para agregar un rol:
+
+1. Agregarlo en `themis/agent.md` y en `core/kernel.py` (`VALID_ROLES`).
+2. Crear `themis/roles/<rol>.md` y agregarlo en `core/roles.py`.
+3. Agregarlo en `themis/loops/roles-loop.md` con estados y handoffs.
+4. Actualizar los archivos requeridos en `core/kernel.py` y los tests.
+5. Ejecutar `python -m unittest discover -s tests -v` y `python cli.py validate`.
+
+## Checklist rápido del Planner
+
+- [ ] Leí `themis/agent.md`
+- [ ] Leí `themis/loops/roles-loop.md`
+- [ ] Leí `themis/roles/planner.md`
 - [ ] No toqué código
-- [ ] No ejecuté comandos del dominio
-- [ ] Documenté el flujo y ejemplos
+- [ ] No ejecuté comandos de dominio
+- [ ] Documenté el flujo y los ejemplos

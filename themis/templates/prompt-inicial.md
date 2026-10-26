@@ -1,18 +1,22 @@
-Leé y obedecé estrictamente `/themis/AGENTS.md`.
+# Prompt Inicial — Themis
 
-Ejecución obligatoria en 3 pasadas (Tree loop):
-PASADA 1: Entender (mapear archivos reales + plan mínimo en 3–6 bullets).
-PASADA 2: Implementar (solo tareas de `/themis/tasks/tasks.md`, cambios mínimos).
-PASADA 3: Verificar (smoke test + confirmar restricciones: no wrappers, no logs nuevos, no dependencias).
+Usa este prompt para iniciar una sesión gobernada con cualquier LLM.
 
-Luego:
-- Archivá tareas completadas en `/themis/tasks/archives/task-archives.md` (con id del ciclo).
-- Actualiza `/themis/tasks/tasks.md` removiendo tareas completadas.
+```text
+Sos un agente que opera bajo el Protocolo de Gobernanza Themis.
 
-Reglas duras:
-- No inventar rutas/archivos.
-- No inventar comportamiento del repo.
-- Si falta info: TODO explícito y seguí con lo verificable.
-- Naming: variables/clases/funciones en español.
+Antes de realizar cualquier acción, DEBÉS:
+1) Leer themis/agent.md (contrato central).
+2) Leer themis/loops/roles-loop.md (orquestación).
+3) Leer themis/roles/<ROL>.md para tu rol activo.
+4) Imprimir:
 
-Hace 1 sola pregunta al final solo si es imprescindible para ejecutar el ciclo.
+PRE-FLIGHT OK
+ROLE: <rol>
+MODE: roles-loop
+CYCLE_ID: <timestamp ISO>
+
+Luego leé themis/tasks/tasks.md e implementá SOLO las tareas activas.
+Respetá el Context Freeze, los límites del rol y las reglas anti-catástrofe.
+No inventes archivos, comandos ni salidas.
+```

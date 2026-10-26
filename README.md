@@ -5,9 +5,10 @@
 > **Rama principal (`main`) en español. Rama `english` con documentación traducida al inglés.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Andres34r7y4/themis/pulls)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/Andres34r7y4?style=social)](https://github.com/sponsors/Andres34r7y4)
+[![CI](https://github.com/Andres34r7y4/themis/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Andres34r7y4/themis/actions/workflows/ci.yml)
 
 Themis es un protocolo de gobernanza autónomo, determinístico y multi-rol para cualquier repositorio que utilice agentes basados en LLM. Su propósito es hacer **predecible el camino de la IA en producción** mediante pautas obligatorias que definen quién decide, quién ejecuta y quién audita.
 
@@ -49,8 +50,11 @@ themis/
 │   ├── FUNDING.yml
 │   ├── ISSUE_TEMPLATE/
 │   │   ├── bug_report.md
+│   │   ├── config.yml
 │   │   └── feature_request.md
-│   └── PULL_REQUEST_TEMPLATE.md
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── workflows/
+│       └── ci.yml                  # CI: tests + validate + install
 ├── docs/
 │   ├── assets/
 │   │   └── themis-banner.jpeg      # Imagen de portada oficial
@@ -75,7 +79,7 @@ themis/
 │   │   ├── documentator.md         # Rol: Documentador
 │   │   ├── devops_engineer.md      # Rol: DevOps
 │   │   ├── product_owner.md        # Rol: Product Owner
-│   │   └── disenador.md            # Rol: Diseñador
+│   │   └── designer.md             # Rol: Diseñador
 │   ├── tasks/
 │   │   ├── tasks.md                # Tareas activas del ciclo
 │   │   └── archives/
@@ -91,6 +95,8 @@ themis/
 │   ├── kernel.py                   # Motor PRE-FLIGHT
 │   ├── roles.py                    # Registro de 10 roles
 │   └── loop.py                     # Orquestador de estados
+├── tests/
+│   └── test_governance.py          # Tests de kernel, CLI, loop y roles
 ├── LICENSE                         # Licencia MIT
 ├── README.md                       # Este archivo
 ├── CONTRIBUTING.md                 # Guía de contribución
@@ -105,11 +111,31 @@ themis/
 ### 1. Clonar el repositorio
 
 ```bash
-git clone git@github.com:Andres34r7y4/themis.git
+git clone https://github.com/Andres34r7y4/themis.git
 cd themis
 ```
 
-### 2. Leer el Kernel de Gobernanza
+### 2. Instalar el CLI
+
+```bash
+python -m pip install -e .
+themis --version
+```
+
+También puedes ejecutarlo sin instalar:
+
+```bash
+python cli.py --help
+```
+
+### 3. Inicializar la gobernanza en tu proyecto
+
+```bash
+themis init --repo ./mi-proyecto
+themis validate --repo ./mi-proyecto
+```
+
+### 4. Leer el Kernel de Gobernanza
 
 El archivo `themis/agent.md` es el **contrato central**. Todo agente debe leerlo antes de actuar:
 
@@ -121,11 +147,26 @@ Antes de realizar cualquier acción o respuesta, el agente DEBE:
 3) Imprimir: PRE-FLIGHT OK
 ```
 
-### 3. Ejecutar un ciclo de gobernanza
+### 5. Ejecutar un ciclo de gobernanza
 
 1. **PLANNER_PHASE**: El Planner descompone el objetivo en tareas atómicas en `tasks.md`
 2. **EXECUTOR_PHASE**: El Executor implementa SOLO lo definido en `tasks.md`
 3. **STOP**: El ciclo termina cuando las tareas están completadas o se alcanza el límite de 3 tareas por ciclo
+
+```bash
+themis run-cycle --role planner
+themis run-cycle --role executor
+```
+
+### Referencia rápida del CLI
+
+| Comando | Descripción |
+|---------|-------------|
+| `themis init [--repo RUTA] [--base-dir NOMBRE] [--force]` | Crea la estructura de gobernanza |
+| `themis validate [--repo RUTA] [--base-dir NOMBRE]` | Valida estructura y PRE-FLIGHT |
+| `themis run-cycle --role ROL [--mode MODO] [--cycle-id ID]` | Ejecuta PRE-FLIGHT para un rol |
+
+Códigos de salida: `0` éxito, `1` error de gobernanza/estructura, `2` uso inválido del CLI.
 
 ---
 
@@ -163,6 +204,21 @@ Antes de realizar cualquier acción o respuesta, el agente DEBE:
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/Andres34r7y4?style=for-the-badge&logo=github)](https://github.com/sponsors/Andres34r7y4)
 [![PayPal](https://img.shields.io/badge/PayPal-Donate-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/paypalme/andresdelgado)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Donate-orange.svg?style=for-the-badge&logo=buymeacoffee)](https://www.buymeacoffee.com/andres34r7y4)
+
+Conecta con el proyecto:
+
+- GitHub: [@Andres34r7y4](https://github.com/Andres34r7y4)
+- LinkedIn: [andresdelgado-architect](https://www.linkedin.com/in/andresdelgado-architect/)
+
+---
+
+## 📚 Documentación
+
+- [Arquitectura](docs/ARCHITECTURE.md)
+- [Ejemplos de integración](docs/EXAMPLES.md)
+- [Guía de uso](docs/guia-uso.md)
+- [Política de seguridad](docs/SECURITY.md)
+- [Registro de cambios](CHANGELOG.md)
 
 ---
 

@@ -40,7 +40,7 @@ El agente **NO está autorizado** a “reconstruir” proyectos. Solo puede hace
 
 ## 1) Flujo obligatorio (orden de ejecución)
 1) Leer este contrato completo.
-2) Leer `themis/goals.md` (o el archivo de objetivos del módulo correspondiente) (objetivos V1).
+2) Leer `themis/objective.md` (o el archivo de objetivos del módulo correspondiente) (objetivos V1).
 3) Leer `themis/tasks/tasks.md` (única fuente de tareas permitidas).
 4) Implementar SOLO lo que esté en `tasks.md` (máximo 3 tareas por ciclo).
 5) Ejecutar verificación mínima (ver sección 6).
@@ -215,7 +215,7 @@ Cuando una tarea requiera analizar documentación y generar backlog:
 
 1. El agente debe leer el template:
 
-`themis/in/humans/template-backlog.md`
+`themis/templates/template-backlog.md`
 
 2. Debe respetar estrictamente su estructura.
 
@@ -246,7 +246,7 @@ Cuando el agente convierta tareas del backlog en tareas activas:
 1. Debe seleccionar **máximo 3 tareas** del backlog.
 2. Debe convertirlas al formato definido en:
 
-themis/in/humans/template-task.md
+themis/templates/template-task.md
 
 3. Debe agregarlas a:
 
@@ -450,7 +450,7 @@ Cada rol tiene responsabilidades separadas definidas en:
 themis/roles/planner.md  
 themis/roles/debugger.md  
 themis/roles/executor.md  
-themis/roles/disenador.md  
+themis/roles/designer.md  
 themis/roles/architect.md  
 themis/roles/security_engineer.md  
 themis/roles/qa_engineer.md  
@@ -460,8 +460,8 @@ themis/roles/product_owner.md
 
 Reglas:
 
-1. Todos los roles deben respetar todas las reglas definidas en este contrato (AGENTS.md).
-2. Si existe conflicto entre archivos de rol y este contrato, prevalece AGENTS.md.
+1. Todos los roles deben respetar todas las reglas definidas en este contrato (agent.md).
+2. Si existe conflicto entre archivos de rol y este contrato, prevalece agent.md.
 3. Los archivos de rol solo agregan responsabilidades específicas y no redefinen reglas globales.
 4. El rol **Debugger** se utiliza únicamente para ciclos de tipo:
    - `bug`
@@ -481,10 +481,10 @@ Este sistema opera mediante **diez roles lógicos**: Planner, Debugger, Executor
 
 Reglas:
 1. Antes de realizar cualquier acción, el agente debe leer:
-   - `themis/AGENTS.md`
+   - `themis/agent.md`
    - `themis/loops/roles-loop.md`
    - `themis/roles/<rol>.md`
-2. Si existe conflicto entre `roles-loop` / archivos de rol y este contrato, **prevalece AGENTS.md**.
+2. Si existe conflicto entre `roles-loop` / archivos de rol y este contrato, **prevalece agent.md**.
 3. Los archivos de rol y loops **no redefinen** reglas globales: solo agregan responsabilidades y secuencia operativa.
 4. Si el ciclo es de tipo `bug`, `diagnostico` o `analisis_dinamico`, el sistema debe evaluar la entrada del rol **Debugger** según `roles-loop.md`.
 5. En ciclos de bug, el rol **Executor** no debe implementar cambios sin un informe previo del Debugger, salvo autorización humana explícita.
@@ -502,7 +502,7 @@ La persistencia de memoria se rige exclusivamente por:
 Reglas:
 1) Planner decide “qué guardar” (selección).
 2) Executor escribe/aplica la persistencia (cambios mínimos, sin inventar archivos).
-3) Si hay conflicto, prevalece este contrato (`AGENTS.md`).
+3) Si hay conflicto, prevalece este contrato (`agent.md`).
 
 ---
 

@@ -11,7 +11,7 @@ Antes de cualquier acción, el sistema DEBE:
    - `MODE: roles-loop`
 
 Regla dura:
-- Si hay conflicto entre roles-loop / roles/* y `AGENTS.md`, **prevalece `AGENTS.md`**.
+- Si hay conflicto entre roles-loop / roles/* y `agent.md`, **prevalece `agent.md`**.
 
 ---
 
@@ -20,7 +20,7 @@ Regla dura:
 Estados válidos:
 - `PLANNER_PHASE`
 - `DEBUGGER_PHASE`
-- `DISENADOR_PHASE`
+- `DESIGNER_PHASE`
 - `EXECUTOR_PHASE`
 - `STOP`
 
@@ -32,7 +32,7 @@ El sistema inicia en:
   - `diagnostico`
   - `analisis_dinamico`
   y ya existe un síntoma suficientemente definido
-- `DISENADOR_PHASE` si el ciclo es de tipo `diseno` o la tarea trae brief visual
+- `DESIGNER_PHASE` si el ciclo es de tipo `diseno` o la tarea trae brief visual
 - `PLANNER_PHASE` si el bug todavía debe descomponerse o aclararse antes del diagnóstico
 - `EXECUTOR_PHASE` solo si el usuario indica explícitamente “solo ejecutar tasks.md”
 
@@ -40,7 +40,7 @@ El sistema inicia en:
 
 ## 2) Entradas / salidas canónicas
 Planner lee:
-- `themis/themis/objetivo.md` (si existe)
+- `themis/objective.md` (si existe)
 - `./themis/tasks/tasks.md`
 - (opcional) backlog/mejoras si existiera en docs
 
@@ -149,7 +149,7 @@ Objetivo: ejecutar SOLO lo que está en `tasks.md`.
 Checklist:
 0) Si el ciclo es de bug, leer obligatoriamente `debug_<CYCLE_ID>.md` antes de tocar código.
 0b) Si la tarea es visual (brief/`diseno`), leer obligatoriamente `design_<CYCLE_ID>.md` antes de tocar lo visual.
-1) Aplicar Tree workflow de `AGENTS.md` (3 pasadas).
+1) Aplicar Tree workflow de `agent.md` (3 pasadas).
 2) Implementar cambios mínimos.
 3) Verificación mínima (smoke test) SOLO si aplica al tipo de ciclo.
 4) Archivar en `task-archives.md` con:
@@ -180,16 +180,16 @@ En ciclos de tipo `diseno` o tareas con brief visual, el Executor NO debe tocar 
 
 Los 6 roles de soporte operan como gates del checklist Executor (además del `0b` visual):
 
-- `0c` **Security**: hace cumplir `AGENTS.md §4` en todo ciclo con cambios.
+- `0c` **Security**: hace cumplir `agent.md §4` en todo ciclo con cambios.
 - `0d` **QA**: valida aceptación pre-STOP en ciclos con código.
 - `0e` **Architect**: gate cuando el ciclo toca estructura, contratos o dependencias.
 - `0f` **Documentator**: gate de docs del entregable (la bitácora sigue en Executor).
 - `0g` **DevOps**: gate de hooks/pipeline/worktrees y rollback.
 - `0h` **Product Owner**: gate pre-Planificación (valor y aceptación de candidatas).
 
-Cada gate se salda con su informe (`security_/qa_/architecture_/docs_/devops_/product_<CYCLE_ID>.md`) o con veto fundado que devuelve a `PLANNER_PHASE`. Precedencia de vetos en `AGENTS.md §12.7`.
+Cada gate se salda con su informe (`security_/qa_/architecture_/docs_/devops_/product_<CYCLE_ID>.md`) o con veto fundado que devuelve a `PLANNER_PHASE`. Precedencia de vetos en `agent.md §12.7`.
 
-## 5b) Reglas del Diseñador (DISENADOR_PHASE)
+## 5b) Reglas del Diseñador (DESIGNER_PHASE)
 
 Objetivo: investigar y proponer lo visual con teoría y criterios medibles, sin implementar el rediseño salvo autorización en la tarea.
 
