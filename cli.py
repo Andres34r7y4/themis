@@ -14,9 +14,8 @@ import sys
 from importlib import resources
 from pathlib import Path
 
+from core import __version__
 from core.kernel import GovernanceKernel
-
-__version__ = "1.1.0"
 
 
 def _assets_dir() -> Path:
