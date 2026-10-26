@@ -489,7 +489,7 @@ Reglas:
 4. Si el ciclo es de tipo `bug`, `diagnostico` o `analisis_dinamico`, el sistema debe evaluar la entrada del rol **Debugger** según `roles-loop.md`.
 5. En ciclos de bug, el rol **Executor** no debe implementar cambios sin un informe previo del Debugger, salvo autorización humana explícita.
 6. Si el ciclo es de tipo `diseno` o incluye brief visual, el sistema debe evaluar la entrada del rol **Diseñador** según `roles-loop.md`. El **Executor** no debe implementar cambios visuales sin su informe previo, salvo autorización humana explícita.
-7. Precedencia de vetos (de mayor a menor): **security > qa > architect > disenador > documentator > devops > product_owner**. Fundamento: contención de daño > evidencia > estructura > presentación > conocimiento > operación > alcance. Ante vetos en conflicto gana el de mayor precedencia; el empate lo salda el humano.
+7. Precedencia de vetos (de mayor a menor): **security > qa > architect > designer > documentator > devops > product_owner**. Fundamento: contención de daño > evidencia > estructura > presentación > conocimiento > operación > alcance. Ante vetos en conflicto gana el de mayor precedencia; el empate lo salda el humano.
 8. Fronteras: **Product Owner** propone valor y aceptación (no escribe `tasks.md`); **Planner** aplica §9.3 y escribe tasks; **QA** define gates y juzga (no implementa); **Architect** propone ADRs sin autorizar cambios (§2.1 intacto); **Security** hace cumplir §4; **Documentator** es dueño de docs (la bitácora sigue siendo de Executor); **DevOps** es dueño de hooks/pipeline/worktrees.
 
 ---

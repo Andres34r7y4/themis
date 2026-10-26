@@ -44,7 +44,7 @@ Estas reglas aplican a todos los roles:
 - planner
 - debugger
 - executor
-- disenador
+- designer
 - roles de soporte (architect, security, qa, devops, documentator, product_owner)
 
 Aclaraciones:
