@@ -170,6 +170,34 @@ Códigos de salida: `0` éxito, `1` error de gobernanza/estructura, `2` uso inv�
 
 ---
 
+## 🤖 Un modelo o varios modelos con orquestador
+
+Themis puede operar de dos formas, y ambas son compatibles porque el protocolo es **modelo-agnóstico**: no depende de OpenAI, Anthropic, DeepSeek ni Ollama, solo del system prompt.
+
+### 1) Un solo modelo para todos los roles
+
+Un mismo LLM actúa como Planner, Executor, Debugger o cualquier otro rol, cambiando de rol entre ciclos o dentro de un ciclo. Cada vez que el modelo actúa, inyecta `themis/agent.md` y el rol correspondiente en su system prompt, imprime `PRE-FLIGHT OK` y respeta los límites de ese rol (`can_touch_code`, `forbidden`, `write_reports`).
+
+**Ventajas:** simplicidad, un solo proveedor, menor costo de integración.
+
+### 2) Varios modelos con un orquestador (multi-modelo)
+
+Un orquestador asigna cada rol a un modelo diferente. Por ejemplo:
+
+| Rol | Modelo sugerido | Por qué |
+|-----|----------------|---------|
+| Planner | Modelo con fuerte razonamiento | Descompone objetivos y define tareas atómicas |
+| Executor | Modelo rápido y económico | Implementa solo lo que dice `tasks.md` |
+| Debugger | Modelo analítico | Diagnostica y produce evidencia |
+| Security Engineer / QA | Modelo especializado en validación | Veto y verificación determinística |
+| Architect | Modelo con contexto largo | Revisa estructura, contratos y dependencias |
+
+Cada modelo recibe solo el contrato de su rol (`themis/roles/<ROL>.md`) y ejecuta su fase. El orquestador coordina las transiciones entre `PLANNER_PHASE`, `EXECUTOR_PHASE`, `DEBUGGER_PHASE`, etc., y garantiza que `PRE-FLIGHT` se cumpla en cada cambio de modelo o rol.
+
+Consulta [docs/MULTI_MODEL_CONFIG.md](docs/MULTI_MODEL_CONFIG.md) para ver cómo configurar ambos escenarios.
+
+---
+
 ## 🏛️ Roles y Responsabilidades
 
 | Rol | Responsabilidad Principal | Puede tocar código |
