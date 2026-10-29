@@ -17,6 +17,7 @@ Themis es un protocolo de gobernanza autónomo, determinístico y multi-rol para
 ## 🎯 El Problema
 
 Los agentes LLM actuales operan como "caja negra": ejecutan comandos, modifican archivos y toman decisiones sin un marco de gobernanza estricto. Esto genera:
+
 - ❌ Cambios no verificables en producción
 - ❌ Falta de trazabilidad de quién tomó qué decisión
 - ❌ Sin contención de daños ante errores
@@ -33,12 +34,13 @@ Themis introduce un **kernel de gobernanza** (`agent.md`) que el LLM debe consum
 | Característica | Descripción |
 |--------------|-------------|
 | 🔒 **PRE-FLIGHT Obligatorio** | Ningún agente actúa sin declarar ROLE, CYCLE_ID y MODE |
-| 🏗️ **Separación de Roles** | Planner, Executor, Debugger, Security, QA, Architect, Documentator, DevOps, Product Owner |
+| 🏗️ **Separación de Roles** | Planner, Executor, Debugger, Security, QA, Architect, Documentator, DevOps, Product Owner, Diseñador |
 | 🔄 **Loop de Estados** | PLANNER → EXECUTOR → STOP con fases controladas |
 | ❄️ **Context Freeze** | Snapshots deterministas antes de ejecutar cambios |
 | 🛡️ **Anti-catástrofe** | Bloqueo automático si una tarea toca >5 archivos o es no atómica |
 | 📋 **Trazabilidad total** | Bitácora en `task-archives.md` con CYCLE_ID, archivos tocados y comandos reales |
 | 🧩 **Agnóstico** | Funciona con cualquier LLM (OpenAI, Anthropic, DeepSeek, Ollama, etc.) |
+| 🧰 **CLI incluido** | `themis init`, `themis validate` y `themis run-cycle` |
 
 ---
 
@@ -60,8 +62,20 @@ themis/
 │   │   └── themis-banner.jpeg      # Imagen de portada oficial
 │   ├── ARCHITECTURE.md             # Diagrama Mermaid del state machine
 │   ├── EXAMPLES.md                 # Ejemplos de integración con LLMs
+│   ├── MULTI_MODEL_CONFIG.md     # Configuración un modelo vs varios modelos con orquestador
 │   ├── SECURITY.md                 # Política de seguridad
+│   ├── TOKEN_EFFICIENCY_ROI.md   # Benchmark de eficiencia de tokens y ROI
 │   └── guia-uso.md                 # Guía operativa
+├── scripts/
+│   └── token_benchmark.py        # Medición de eficiencia de tokens y ROI
+├── sandbox/
+│   ├── experiment.md             # Experimento de gobernanza (saludo parametrizado)
+│   ├── target/
+│   │   └── greeting.py           # Script mínimo gobernado por Themis
+│   └── tasks/
+│       ├── tasks.md              # Tareas activas del ciclo de sandbox
+│       └── archives/
+│           └── task-archives.md  # Bitácora del ciclo de sandbox
 ├── themis/
 │   ├── agent.md                    # Kernel de gobernanza (contrato central)
 │   ├── PATHS.md                    # Fuente única de rutas del sistema
@@ -185,7 +199,7 @@ Un mismo LLM actúa como Planner, Executor, Debugger o cualquier otro rol, cambi
 Un orquestador asigna cada rol a un modelo diferente. Por ejemplo:
 
 | Rol | Modelo sugerido | Por qué |
-|-----|----------------|---------|
+|-----|-----------------|---------|
 | Planner | Modelo con fuerte razonamiento | Descompone objetivos y define tareas atómicas |
 | Executor | Modelo rápido y económico | Implementa solo lo que dice `tasks.md` |
 | Debugger | Modelo analítico | Diagnostica y produce evidencia |
@@ -212,6 +226,51 @@ Consulta [docs/MULTI_MODEL_CONFIG.md](docs/MULTI_MODEL_CONFIG.md) para ver cómo
 | **DevOps** | Gate de hooks, pipeline, worktrees y rollback | ❌ No (solo veto) |
 | **Product Owner** | Gate pre-planificación (valor y aceptación) | ❌ No (solo veto) |
 | **Diseñador** | Propone lo visual con criterios medibles | ❌ No (solo veto) |
+
+---
+
+## 📊 Token Efficiency & ROI Benchmark
+
+Themis incluye un marco de medición para validar, con datos reales, si el coste de tokens de la gobernanza se compensa con los errores evitados, la trazabilidad y la reducción de retrabajo.
+
+### ¿Qué mide?
+
+| Métrica | Qué revela |
+|---------|------------|
+| **Overhead de tokens por ciclo** | Tokens extra que consume la gobernanza (PRE-FLIGHT, roles, loops) frente a un agente sin gobernanza. |
+| **Tokens ahorrados por Context Freeze** | Archivos que no se leen gracias al Freeze Map (solo lo necesario). |
+| **Coste por ciclo (USD)** | Precio real según tu proveedor y modelo (OpenAI, Anthropic, DeepSeek, Ollama…). |
+| **Errores evitados pre-ejecución** | Errores detectados por QA/Security antes de tocar código. |
+| **Ciclos de retrabajo reducidos** | Tareas atómicas que evitan refactors y reejecuciones. |
+| **ROI de gobernanza** | (Valor de incidentes evitados + retrabajo evitado + trazabilidad) / coste en tokens. |
+
+### Fórmula de ROI
+
+```text
+ROI = Valor evitado (USD) / Coste de gobernanza (USD)
+
+Valor evitado =
+  (incidentes prevenidos × coste por incidente) +
+  (ciclos de retrabajo evitados × coste por ciclo) +
+  valor de trazabilidad y auditoría
+```
+
+- **ROI > 100 %**: la gobernanza se paga sola.
+- **ROI >> 100 %**: genera ahorro neto.
+
+### Cómo ejecutar el benchmark
+
+```bash
+# Modo simulación (sin API, con datos de ejemplo)
+python scripts/token_benchmark.py --mode dry-run --output docs/benchmark-results.md
+
+# Modo real con OpenAI (requiere OPENAI_API_KEY)
+python scripts/token_benchmark.py --provider openai --model gpt-4o \
+  --task "Validar un archivo de configuración JSON" \
+  --output docs/benchmark-results.md
+```
+
+Consulta la documentación completa en [docs/TOKEN_EFFICIENCY_ROI.md](docs/TOKEN_EFFICIENCY_ROI.md) con la metodología, fórmula detallada, tabla de resultados esperada y checklist de lo que debe auditar un experto.
 
 ---
 
@@ -245,9 +304,10 @@ Conecta con el proyecto:
 - [Arquitectura](docs/ARCHITECTURE.md)
 - [Ejemplos de integración](docs/EXAMPLES.md)
 - [Guía de uso](docs/guia-uso.md)
+- [Configuración multi-modelo](docs/MULTI_MODEL_CONFIG.md)
+- [Benchmark de tokens y ROI](docs/TOKEN_EFFICIENCY_ROI.md)
 - [Política de seguridad](docs/SECURITY.md)
 - [Registro de cambios](CHANGELOG.md)
-- [Experimento de gobernanza (sandbox)](sandbox/experiment.md)
 
 ---
 
