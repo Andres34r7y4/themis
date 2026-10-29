@@ -247,6 +247,7 @@ Conecta con el proyecto:
 - [Guía de uso](docs/guia-uso.md)
 - [Política de seguridad](docs/SECURITY.md)
 - [Registro de cambios](CHANGELOG.md)
+- [Experimento de gobernanza (sandbox)](sandbox/experiment.md)
 
 ---
 
